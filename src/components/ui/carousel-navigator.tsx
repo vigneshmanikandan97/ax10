@@ -16,6 +16,7 @@ interface CarouselNavigatorProps {
   currentIndex: number;
   onIndexChange: (index: number) => void;
   slideKey?: number | string;
+  compact?: boolean;
 }
 
 const DEFAULT_TOTAL_SLIDES = 4;
@@ -55,6 +56,7 @@ export const CarouselNavigator: FC<CarouselNavigatorProps> = ({
   currentIndex,
   onIndexChange,
   slideKey,
+  compact = false,
 }) => {
   const theme = themes[currentIndex];
 
@@ -68,16 +70,21 @@ export const CarouselNavigator: FC<CarouselNavigatorProps> = ({
       animate={{
         backgroundColor: theme.bg.replace("bg-[", "").replace("]", ""),
       }}
-      className="frosted-bar flex items-center justify-center gap-1 rounded-full border border-white/[0.08] px-3 py-2 transition-colors duration-300 md:px-4 md:py-3"
+      className={`frosted-bar flex items-center justify-center rounded-full border border-white/[0.08] transition-colors duration-300 ${
+        compact
+          ? "gap-0.5 px-2 py-1 md:px-2.5 md:py-1.5"
+          : "gap-1 px-3 py-2 md:px-4 md:py-3"
+      }`}
     >
-      <ArrowButton onClick={goPrev} themeColor={theme.button}>
-        <ChevronLeft size={24} strokeWidth={3} />
+      <ArrowButton compact={compact} onClick={goPrev} themeColor={theme.button}>
+        <ChevronLeft size={compact ? 16 : 24} strokeWidth={3} />
       </ArrowButton>
 
-      <div className="flex items-center gap-2 px-2">
+      <div className={`flex items-center ${compact ? "gap-1 px-1" : "gap-2 px-2"}`}>
         {Array.from({ length: totalSlides }).map((_, i) => (
           <Indicator
             key={i}
+            compact={compact}
             isActive={i === currentIndex}
             theme={theme}
             autoDelay={autoDelay}
@@ -87,8 +94,8 @@ export const CarouselNavigator: FC<CarouselNavigatorProps> = ({
         ))}
       </div>
 
-      <ArrowButton onClick={goNext} themeColor={theme.button}>
-        <ChevronRight size={24} strokeWidth={3} />
+      <ArrowButton compact={compact} onClick={goNext} themeColor={theme.button}>
+        <ChevronRight size={compact ? 16 : 24} strokeWidth={3} />
       </ArrowButton>
     </motion.div>
   );
@@ -98,17 +105,21 @@ const ArrowButton = ({
   children,
   onClick,
   themeColor,
+  compact = false,
 }: {
   children: ReactNode;
   onClick: () => void;
   themeColor: string;
+  compact?: boolean;
 }) => {
   return (
     <motion.button
       type="button"
       onClick={onClick}
       whileTap={{ scale: 0.9 }}
-      className={`flex h-10 w-10 items-center justify-center rounded-full text-surface-deep shadow-sm transition-colors duration-300 md:h-11 md:w-11 ${themeColor}`}
+      className={`flex items-center justify-center rounded-full text-surface-deep shadow-sm transition-colors duration-300 ${themeColor} ${
+        compact ? "h-7 w-7 md:h-8 md:w-8" : "h-10 w-10 md:h-11 md:w-11"
+      }`}
     >
       {children}
     </motion.button>
@@ -121,12 +132,14 @@ const Indicator = ({
   autoDelay,
   slideKey,
   onClick,
+  compact = false,
 }: {
   isActive: boolean;
   theme: ThemeConfig;
   autoDelay: number;
   slideKey: number | string;
   onClick: () => void;
+  compact?: boolean;
 }) => {
   return (
     <motion.button
@@ -135,8 +148,16 @@ const Indicator = ({
       layout
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       style={{ borderRadius: 24 }}
-      className={`relative h-3 cursor-pointer  focus:outline-none ${
-        isActive ? `w-12 ${theme.progress}` : `w-3 ${theme.dot}`
+      className={`relative cursor-pointer focus:outline-none ${
+        compact ? "h-2" : "h-3"
+      } ${
+        isActive
+          ? compact
+            ? `w-8 ${theme.progress}`
+            : `w-12 ${theme.progress}`
+          : compact
+            ? `w-2 ${theme.dot}`
+            : `w-3 ${theme.dot}`
       } transition-colors duration-300`}
     >
       {isActive && (

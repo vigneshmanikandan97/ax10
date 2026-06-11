@@ -93,31 +93,36 @@ export const whyUsCards = [
   {
     index: '01',
     title: 'Technical Expertise',
-    body: 'Senior engineers who have shipped at scale. Clean code, clear architecture, and documentation your team can inherit.',
+    body:
+      'Senior engineers who have shipped production systems at scale—not slide decks. We write code your team can read, extend, and own: clear architecture, sensible abstractions, and documentation that survives the first handoff.',
     accent: '#69C991',
   },
   {
     index: '02',
     title: 'Strategic Assets',
-    body: 'We treat every build as business infrastructure. The goal is IP and systems that compound value over years.',
+    body:
+      'Every build is treated as business infrastructure, not a one-off deliverable. We design for reusable IP, maintainable systems, and decisions that compound—so what we ship keeps paying off long after we step back.',
     accent: '#9FFFB0',
   },
   {
     index: '03',
     title: 'Purposeful Simplicity',
-    body: 'We remove steps, screens, and jargon until the product feels obvious. Simple is harder; that is the point.',
+    body:
+      'We strip steps, screens, and jargon until the product feels inevitable. Simplicity is not decoration—it is the hard work of knowing what to leave out so users never have to think twice.',
     accent: '#69C991',
   },
   {
     index: '04',
     title: 'AI-First Delivery',
-    body: 'We use AI to move faster on the repetitive work. Judgment, taste, and client context stay with our team.',
+    body:
+      'AI handles the repetitive layers—boilerplate, tests, migrations—so our team spends time on judgment, taste, and your context. You get faster delivery without trading away quality or accountability.',
     accent: '#9FFFB0',
   },
   {
     index: '05',
     title: 'Human-Centric by Default',
-    body: 'Every feature starts with a person and a problem. The tech is there to make their day easier.',
+    body:
+      'Every feature starts with a real person and a real problem. We design for the humans using the software, not the architecture diagram. Technology should shorten someone’s day, not add to it.',
     accent: '#69C991',
   },
 ] as const
