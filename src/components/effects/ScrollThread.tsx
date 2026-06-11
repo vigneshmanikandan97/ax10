@@ -16,7 +16,6 @@ type GlobeBounds = {
 
 const PAGE_ROOT_SELECTOR = '[data-page-root]'
 const GLOBE_SELECTOR = '[data-hero-globe]'
-const SECTION_SELECTOR = '#what-we-do'
 const ENTRY_SELECTOR = '[data-thread-entry]'
 
 /** Magenta filament — chromatic opposite of the site green. */
@@ -37,7 +36,6 @@ function getAnchors() {
   return {
     page: getPageRoot(),
     globe: document.querySelector<HTMLElement>(GLOBE_SELECTOR),
-    section: document.querySelector<HTMLElement>(SECTION_SELECTOR),
     entry: document.querySelector<HTMLElement>(ENTRY_SELECTOR),
     email: document.getElementById('footer-contact-email'),
   }
@@ -72,119 +70,111 @@ function getGlobeBounds(pageEl: HTMLElement, globeEl: HTMLElement): GlobeBounds 
   }
 }
 
-function pickBounceCount(width: number): 1 | 2 {
-  return width >= 900 ? 2 : 1
+/** Smooth open spline — duplicated endpoints give gentle start/end tangents. */
+function catmullRomPath(points: Point[], tension = 1): string {
+  if (points.length === 0) return ''
+  if (points.length === 1) {
+    return `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`
+  }
+
+  const padded = [points[0], ...points, points[points.length - 1]]
+  let d = `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`
+  const t = tension / 6
+
+  for (let i = 1; i < padded.length - 2; i += 1) {
+    const p0 = padded[i - 1]
+    const p1 = padded[i]
+    const p2 = padded[i + 1]
+    const p3 = padded[i + 2]
+
+    const cp1x = p1.x + (p2.x - p0.x) * t
+    const cp1y = p1.y + (p2.y - p0.y) * t
+    const cp2x = p2.x - (p3.x - p1.x) * t
+    const cp2y = p2.y - (p3.y - p1.y) * t
+
+    d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`
+  }
+
+  return d
 }
 
-function appendCurveSegment(d: string, p0: Point, p1: Point) {
-  const cp1x = p0.x + (p1.x - p0.x) * 0.42 + Math.sin(p0.y * 0.04) * 1.2
-  const cp1y = p0.y + (p1.y - p0.y) * 0.08
-  const cp2x = p0.x + (p1.x - p0.x) * 0.58
-  const cp2y = p0.y + (p1.y - p0.y) * 0.9 + Math.cos(p1.x * 0.03) * 0.8
-  return `${d} C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p1.x.toFixed(1)} ${p1.y.toFixed(1)}`
-}
-
-function buildGlobeFilament(
-  globe: GlobeBounds,
-  sectionTop: number,
-  narrow: boolean,
-): { points: Point[]; origin: Point } {
-  const margin = narrow ? 20 : 32
-  const origin: Point = {
-    x: globe.left + globe.width * 0.1,
-    y: globe.top + globe.height * 0.62,
-  }
-
-  const exitLeft: Point = {
-    x: globe.left - margin,
-    y: globe.top + globe.height * 0.66,
-  }
-
-  const bendDown: Point = {
-    x: globe.left - margin - (narrow ? 8 : 14),
-    y: sectionTop + (narrow ? 28 : 40),
-  }
-
-  return {
-    origin,
-    points: [origin, exitLeft, bendDown],
-  }
-}
-
-function buildSectionRoute(
-  entry: Point,
-  end: Point,
-  width: number,
-  narrow: boolean,
-): Point[] {
-  const lane = (pct: number) => width * pct
-  const bounceCount = pickBounceCount(width)
-  const span = Math.max(end.y - entry.y, 160)
-  const points: Point[] = [
-    { x: entry.x + (narrow ? 8 : 12), y: entry.y + span * 0.06 },
-    { x: lane(narrow ? 0.14 : 0.1), y: entry.y + span * 0.18 },
-  ]
-
-  if (bounceCount === 2) {
-    points.push(
-      { x: lane(0.82), y: entry.y + span * 0.28 },
-      { x: lane(0.48), y: entry.y + span * 0.42 },
-      { x: lane(0.88), y: entry.y + span * 0.56 },
-      { x: lane(0.44), y: entry.y + span * 0.7 },
-      { x: lane(0.78), y: entry.y + span * 0.84 },
-    )
-  } else {
-    points.push(
-      { x: lane(0.84), y: entry.y + span * 0.34 },
-      { x: lane(0.46), y: entry.y + span * 0.54 },
-      { x: lane(0.8), y: entry.y + span * 0.74 },
-    )
-  }
-
-  points.push(
-    { x: end.x + (narrow ? 24 : 40), y: end.y - (narrow ? 32 : 48) },
-    end,
-  )
-
-  return points
-}
-
-function buildThreadPath(
+function buildSwingPath(
   pageEl: HTMLElement,
   globeEl: HTMLElement,
-  sectionEl: HTMLElement,
   entryEl: HTMLElement,
   emailEl: HTMLElement | null,
   pageHeight: number,
-) {
+): { d: string; origin: Point } {
   const width = pageEl.clientWidth
-  const narrow = width < 1024
+  const narrow = width < 640
+  const tablet = width < 1024
   const globe = getGlobeBounds(pageEl, globeEl)
-  const sectionTop = toPageCoords(pageEl, sectionEl, 0, 0).y
   const entry = toPageCoords(pageEl, entryEl, 0, 0.5)
   const end = emailEl
     ? toPageCoords(pageEl, emailEl, 0.02, 0.5)
-    : { x: width * 0.1, y: pageHeight - 96 }
+    : { x: width * 0.12, y: pageHeight - 96 }
 
-  const { origin, points: filament } = buildGlobeFilament(globe, sectionTop, narrow)
-  const routePoints = buildSectionRoute(entry, end, width, narrow)
+  const offLeft = narrow ? -28 : tablet ? -52 : -68
+  const offRight = width + (narrow ? 28 : tablet ? 52 : 68)
+  const span = Math.max(end.y - entry.y, 220)
 
-  let d = `M ${origin.x.toFixed(1)} ${origin.y.toFixed(1)}`
-
-  for (let i = 0; i < filament.length - 1; i += 1) {
-    const p0 = filament[i]
-    const p1 = filament[i + 1]
-    d = appendCurveSegment(d, p0, p1)
+  const origin: Point = {
+    x: globe.left + globe.width * 0.14,
+    y: globe.top + globe.height * 0.56,
   }
 
-  d = appendCurveSegment(d, filament[filament.length - 1], entry)
+  const waypoints: Point[] = [
+    origin,
+    // peel off the globe toward the left edge
+    {
+      x: globe.left + globe.width * 0.02,
+      y: globe.top + globe.height * 0.72,
+    },
+    // arc outside the left viewport
+    {
+      x: offLeft + (narrow ? 16 : 32),
+      y: origin.y + (entry.y - origin.y) * 0.22,
+    },
+    {
+      x: offLeft,
+      y: origin.y + (entry.y - origin.y) * 0.48,
+    },
+    // swing back in at the section entry
+    {
+      x: width * (narrow ? 0.22 : 0.16),
+      y: entry.y - (narrow ? 16 : 24),
+    },
+    {
+      x: entry.x + (narrow ? 8 : 14),
+      y: entry.y,
+    },
+  ]
 
-  for (let i = 0; i < routePoints.length; i += 1) {
-    const p0 = i === 0 ? entry : routePoints[i - 1]
-    d = appendCurveSegment(d, p0, routePoints[i])
+  const swingCount = narrow ? 3 : tablet ? 4 : 5
+  for (let i = 0; i < swingCount; i += 1) {
+    const phase = (i + 1) / (swingCount + 0.5)
+    const y = entry.y + span * (0.1 + phase * 0.78)
+    const exitRight = i % 2 === 0
+
+    waypoints.push({
+      x: exitRight ? offRight : offLeft,
+      y,
+    })
   }
 
-  return { d, origin }
+  waypoints.push(
+    {
+      x: end.x + (narrow ? 56 : 80),
+      y: end.y - (narrow ? 48 : 72),
+    },
+    {
+      x: end.x + (narrow ? 10 : 16),
+      y: end.y - (narrow ? 12 : 18),
+    },
+    end,
+  )
+
+  return { d: catmullRomPath(waypoints, 1.2), origin }
 }
 
 function measurePage(page: HTMLElement): PageSize {
@@ -194,19 +184,15 @@ function measurePage(page: HTMLElement): PageSize {
   }
 }
 
-function dotOpacityForProgress(progress: number) {
-  if (progress <= 0.005) return 0
-  if (progress >= 0.92) {
-    return Math.max(0, 1 - (progress - 0.92) / 0.08)
-  }
-  return 1
-}
-
 function sameSize(a: PageSize, b: PageSize) {
   return a.width === b.width && a.height === b.height
 }
 
-/** Scroll-driven magenta filament from the hero globe into What We Do, ending at the footer email. */
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value))
+}
+
+/** Scroll-driven magenta filament that swings in and out of the viewport. */
 export function ScrollThread() {
   const location = useLocation()
   const pathRef = useRef<SVGPathElement>(null)
@@ -215,6 +201,7 @@ export function ScrollThread() {
   const originGlowRef = useRef<SVGCircleElement>(null)
   const originCoreRef = useRef<SVGCircleElement>(null)
   const progressRef = useRef(0)
+  const pathLengthRef = useRef(0)
   const pathDRef = useRef('')
   const originRef = useRef<Point>({ x: 0, y: 0 })
   const pageSizeRef = useRef<PageSize>({ width: 0, height: 0 })
@@ -226,6 +213,7 @@ export function ScrollThread() {
 
   useEffect(() => {
     progressRef.current = 0
+    pathLengthRef.current = 0
     pathDRef.current = ''
     pageSizeRef.current = { width: 0, height: 0 }
     originRef.current = { x: 0, y: 0 }
@@ -270,34 +258,27 @@ export function ScrollThread() {
     const length = path.getTotalLength()
     if (!Number.isFinite(length) || length <= 0) return
 
-    const drawn = length * progressRef.current
+    pathLengthRef.current = length
+
+    const progress = clamp(progressRef.current, 0, 1)
+    const drawn = length * progress
+
     path.style.strokeDasharray = `${length}`
-    path.style.strokeDashoffset = `${Math.max(0, length - drawn)}`
+    path.style.strokeDashoffset = `${length - drawn}`
 
     const point = path.getPointAtLength(drawn)
     dot.setAttribute('cx', String(point.x))
     dot.setAttribute('cy', String(point.y))
-    dot.style.opacity = String(dotOpacityForProgress(progressRef.current))
-    path.style.opacity = String(
-      progressRef.current >= 0.9
-        ? Math.max(0.35, 1 - ((progressRef.current - 0.9) / 0.1) * 0.45)
-        : 0.88,
-    )
 
-    const originOpacity =
-      progressRef.current <= 0.005
-        ? 0
-        : Math.min(1, progressRef.current * 4) *
-          (progressRef.current >= 0.92
-            ? Math.max(0, 1 - (progressRef.current - 0.92) / 0.08)
-            : 1)
+    const fadeIn = clamp(progress / 0.04, 0, 1)
+    const fadeOut = progress >= 0.96 ? clamp(1 - (progress - 0.96) / 0.04, 0, 1) : 1
+    const visibility = fadeIn * fadeOut
 
-    originGlowRef.current?.setAttribute('opacity', String(originOpacity * 0.9))
-    originCoreRef.current?.setAttribute('opacity', String(originOpacity))
-    trackRef.current?.setAttribute(
-      'opacity',
-      String(progressRef.current <= 0.005 ? 0 : 1),
-    )
+    dot.style.opacity = String(visibility)
+    path.style.opacity = String(0.88 * visibility)
+    trackRef.current?.setAttribute('opacity', String(visibility * 0.85))
+    originGlowRef.current?.setAttribute('opacity', String(visibility * 0.9))
+    originCoreRef.current?.setAttribute('opacity', String(visibility))
   }, [])
 
   useLayoutEffect(() => {
@@ -305,26 +286,27 @@ export function ScrollThread() {
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     let disposed = false
-    let rafId = 0
     let retryId = 0
     let resizeId = 0
-    let scrollRefreshId = 0
+    let refreshId = 0
     let retries = 0
 
     const syncProgress = () => {
       const trigger = ScrollTrigger.getById('scroll-thread')
-      progressRef.current = trigger?.progress ?? 0
+      if (trigger) {
+        progressRef.current = trigger.progress
+      }
       updateDraw()
     }
 
     const applyLayout = () => {
-      const { globe, section, entry, email } = getAnchors()
-      if (!globe || !section || !entry) return false
+      const { globe, entry, email } = getAnchors()
+      if (!globe || !entry) return false
 
       const size = measurePage(pageEl)
       if (size.width <= 0 || size.height <= 80) return false
 
-      const built = buildThreadPath(pageEl, globe, section, entry, email, size.height)
+      const built = buildSwingPath(pageEl, globe, entry, email, size.height)
       if (!built.d || built.d.length < 8) return false
 
       const sizeChanged = !sameSize(pageSizeRef.current, size)
@@ -343,12 +325,12 @@ export function ScrollThread() {
       }
 
       if (sizeChanged || pathChanged) {
-        window.clearTimeout(scrollRefreshId)
-        scrollRefreshId = window.setTimeout(() => {
+        window.clearTimeout(refreshId)
+        refreshId = window.setTimeout(() => {
           if (disposed) return
           ScrollTrigger.refresh()
           syncProgress()
-        }, 120)
+        }, 100)
       } else {
         syncProgress()
       }
@@ -368,34 +350,15 @@ export function ScrollThread() {
 
     retryApply()
 
-    const onScroll = () => {
-      cancelAnimationFrame(rafId)
-      rafId = requestAnimationFrame(syncProgress)
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll, { passive: true })
-
-    const onPageShow = (event: PageTransitionEvent) => {
-      if (!event.persisted) return
-      ScrollTrigger.refresh()
-      syncProgress()
-    }
-
-    window.addEventListener('pageshow', onPageShow)
-
     const ctx = gsap.context(() => {
       ScrollTrigger.getById('scroll-thread')?.kill()
 
-      const section = document.querySelector<HTMLElement>(SECTION_SELECTOR)
-
       ScrollTrigger.create({
         id: 'scroll-thread',
-        trigger: section ?? pageEl,
-        start: 'top 80%',
-        endTrigger: pageEl,
+        trigger: pageEl,
+        start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.2,
+        scrub: true,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
           progressRef.current = self.progress
@@ -421,13 +384,12 @@ export function ScrollThread() {
       resizeId = window.setTimeout(() => {
         if (disposed) return
         applyLayout()
-      }, 80)
+      }, 120)
     })
     observer.observe(pageEl)
 
-    const { globe, section, entry, email } = getAnchors()
+    const { globe, entry, email } = getAnchors()
     if (globe) observer.observe(globe)
-    if (section) observer.observe(section)
     if (entry) observer.observe(entry)
     if (email) observer.observe(email)
 
@@ -438,16 +400,12 @@ export function ScrollThread() {
 
     return () => {
       disposed = true
-      cancelAnimationFrame(rafId)
       window.clearTimeout(retryId)
       window.clearTimeout(resizeId)
-      window.clearTimeout(scrollRefreshId)
+      window.clearTimeout(refreshId)
       window.clearTimeout(settleId)
       ctx.revert()
       observer.disconnect()
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
-      window.removeEventListener('pageshow', onPageShow)
     }
   }, [pageEl, updateDraw, location.key])
 
@@ -523,7 +481,7 @@ export function ScrollThread() {
             strokeWidth={width < 640 ? 2 : 1.75}
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity="0.88"
+            opacity="0"
           />
 
           <circle
