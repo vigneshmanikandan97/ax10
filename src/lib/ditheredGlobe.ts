@@ -1,5 +1,3 @@
-import type { BlobPointer } from './organicBlob'
-
 const BAYER_4 = [
   [0, 8, 2, 10],
   [12, 4, 14, 6],
@@ -83,20 +81,14 @@ function project(
   }
 }
 
-function globeField(
-  lat: number,
-  lon: number,
-  time: number,
-  pointer: BlobPointer,
-) {
+function globeField(lat: number, lon: number, time: number) {
   const t = time * 0.00035
   const wave =
     Math.sin(lat * 0.09 + lon * 0.07 + t) *
-      Math.cos(lon * 0.05 - t * 0.8 + pointer.x * 0.4) *
+      Math.cos(lon * 0.05 - t * 0.8) *
       0.5 +
     0.5
-  const wave2 =
-    Math.sin((lat + lon) * 0.06 + t * 0.65 + pointer.y * 0.3) * 0.5 + 0.5
+  const wave2 = Math.sin((lat + lon) * 0.06 + t * 0.65) * 0.5 + 0.5
   const wave3 = Math.cos(lat * 0.04 - t * 0.5 + lon * 0.08) * 0.5 + 0.5
   const graticuleLat = Math.abs(Math.sin((lat * Math.PI) / 180 * 6)) > 0.92 ? 0.18 : 0
   const graticuleLon = Math.abs(Math.sin((lon * Math.PI) / 180 * 6)) > 0.92 ? 0.14 : 0
@@ -107,15 +99,10 @@ function globeField(
   )
 }
 
-function distortedRadius(
-  angle: number,
-  base: number,
-  time: number,
-  pointer: BlobPointer,
-) {
+function distortedRadius(angle: number, base: number, time: number) {
   const warp =
     fbm(Math.cos(angle) * 2.2 + time * 0.00008, Math.sin(angle) * 2.2, 3) * 0.14
-  const pulse = Math.sin(time * 0.00045 + pointer.x * 0.5) * 0.04
+  const pulse = Math.sin(time * 0.00045) * 0.04
   return base * (1 + warp + pulse)
 }
 
@@ -194,18 +181,17 @@ export function drawDitheredGlobe(
   width: number,
   height: number,
   time: number,
-  pointer: BlobPointer,
   options: {
     centerX?: number
     centerY?: number
     scale?: number
   } = {},
 ) {
-  const centerX = options.centerX ?? width * 0.56
-  const centerY = options.centerY ?? height * 0.58
+  const centerX = options.centerX ?? width * 0.5
+  const centerY = options.centerY ?? height * 0.5
   const radius = Math.min(width, height) * (options.scale ?? 0.44)
-  const rotY = time * 0.00022 + pointer.x * 0.35
-  const rotX = 0.32 + pointer.y * 0.18
+  const rotY = time * 0.00022
+  const rotX = 0.32
 
   ctx.clearRect(0, 0, width, height)
 
@@ -231,13 +217,14 @@ export function drawDitheredGlobe(
   const minY = Math.floor(centerY - radius * 1.08)
   const maxY = Math.ceil(centerY + radius * 1.08)
 
+  // Only paint lit dither pixels — skip "off" cells so the sphere stays transparent.
   for (let py = minY; py < maxY; py += step) {
     for (let px = minX; px < maxX; px += step) {
       const dx = px - centerX
       const dy = py - centerY
       const angle = Math.atan2(dy, dx)
       const dist = Math.hypot(dx, dy)
-      const edgeR = distortedRadius(angle, radius, time, pointer)
+      const edgeR = distortedRadius(angle, radius, time)
       if (dist > edgeR) continue
 
       const v = screenToSphere(px, py, centerX, centerY, radius, rotY, rotX)
@@ -245,16 +232,12 @@ export function drawDitheredGlobe(
 
       const { lat, lon } = vec3ToLatLon(v)
       const depth = Math.min(1, (v.z - 0.04) * 1.8)
-      const field = globeField(lat, lon, time, pointer) * (0.55 + depth * 0.45)
+      const field = globeField(lat, lon, time) * (0.55 + depth * 0.45)
       const threshold = BAYER_4[py % 4][px % 4] / 16
-      const on = field > threshold
+      if (field <= threshold) continue
 
-      const r = on ? 105 : 14
-      const g = on ? 201 : 16
-      const b = on ? 145 : 18
-      const a = on ? Math.round(155 + depth * 100) : Math.round(28 + depth * 40)
-
-      ctx.fillStyle = `rgba(${r},${g},${b},${a / 255})`
+      const alpha = (155 + depth * 100) / 255
+      ctx.fillStyle = `rgba(105, 201, 145, ${alpha.toFixed(3)})`
       ctx.fillRect(px, py, step, step)
     }
   }
@@ -287,7 +270,7 @@ export function drawDitheredGlobe(
   ctx.lineWidth = 1.25
   ctx.beginPath()
   for (let a = 0; a < Math.PI * 2; a += 0.04) {
-    const r = distortedRadius(a, radius, time, pointer)
+    const r = distortedRadius(a, radius, time)
     const x = centerX + Math.cos(a) * r
     const y = centerY + Math.sin(a) * r
     if (a === 0) ctx.moveTo(x, y)

@@ -1,65 +1,100 @@
-import { useCallback, useEffect, useRef } from 'react'
-import { gsap } from '../../lib/gsap'
-import type { BlobPointer } from '../../lib/organicBlob'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { drawDitheredGlobe } from '../../lib/ditheredGlobe'
 import { useCanvasSurface } from '../../hooks/useCanvasSurface'
+import { useAppReady } from '../../context/AppReadyContext'
+
+const GLOBE_FPS = 24
 
 const BASE_ROT_X = 6
 const BASE_ROT_Y = -14
 const BASE_SKEW_Y = -5
-const BASE_SCALE = 1.42
-const CURSOR_ROT_X = 5
-const CURSOR_ROT_Y = 8
 
-function applyGlobeTransform(el: HTMLElement, rotX: number, rotY: number) {
+function getGlobeLayout(width: number) {
+  if (width < 640) {
+    return {
+      scale: 0.72,
+      translateX: '4%',
+      drawScale: 0.38,
+      centerX: 0.5,
+      centerY: 0.5,
+      maxBufferEdge: 520,
+      maxFps: GLOBE_FPS,
+    }
+  }
+
+  if (width < 1024) {
+    return {
+      scale: 1,
+      translateX: '10%',
+      drawScale: 0.42,
+      centerX: 0.5,
+      centerY: 0.5,
+      maxBufferEdge: 640,
+      maxFps: GLOBE_FPS,
+    }
+  }
+
+  return {
+    scale: 1.42,
+    translateX: '18%',
+    drawScale: 0.44,
+    centerX: 0.5,
+    centerY: 0.5,
+    maxBufferEdge: 720,
+    maxFps: GLOBE_FPS,
+  }
+}
+
+function applyGlobeTransform(el: HTMLElement, width: number) {
+  const layout = getGlobeLayout(width)
+
   el.style.transform = [
-    'translateX(18%)',
+    `translateX(${layout.translateX})`,
     'perspective(1200px)',
-    `rotateX(${rotX}deg)`,
-    `rotateY(${rotY}deg)`,
+    `rotateX(${BASE_ROT_X}deg)`,
+    `rotateY(${BASE_ROT_Y}deg)`,
     `skewY(${BASE_SKEW_Y}deg)`,
-    `scale(${BASE_SCALE})`,
+    `scale(${layout.scale})`,
   ].join(' ')
 }
 
-/** Cursor-reactive dithered globe blob for the hero. */
+/** Auto-spinning dithered globe blob for the hero. */
 export function HeroBlob() {
+  const appReady = useAppReady()
   const wrapperRef = useRef<HTMLDivElement>(null)
   const canvasHostRef = useRef<HTMLDivElement>(null)
-  const pointerRef = useRef<BlobPointer>({ x: 0, y: 0 })
+  const layoutRef = useRef(getGlobeLayout(window.innerWidth))
+  const [canvasOptions, setCanvasOptions] = useState(() => {
+    const layout = layoutRef.current
+    return {
+      maxBufferEdge: layout.maxBufferEdge,
+      maxFps: layout.maxFps,
+      pauseOnScroll: false,
+      enabled: appReady,
+    }
+  })
 
   useEffect(() => {
     const wrapper = wrapperRef.current
     if (!wrapper) return
 
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    applyGlobeTransform(wrapper, BASE_ROT_X, BASE_ROT_Y)
-
-    if (reduced) return
-
-    const tilt = { x: BASE_ROT_X, y: BASE_ROT_Y }
-    const target = { x: 0, y: 0 }
-
-    const onMove = (event: MouseEvent) => {
-      target.x = (event.clientX / window.innerWidth - 0.5) * 2
-      target.y = (event.clientY / window.innerHeight - 0.5) * 2
-      pointerRef.current = { x: target.x, y: target.y }
+    const syncLayout = () => {
+      const layout = getGlobeLayout(window.innerWidth)
+      layoutRef.current = layout
+      setCanvasOptions({
+        maxBufferEdge: layout.maxBufferEdge,
+        maxFps: layout.maxFps,
+        pauseOnScroll: false,
+        enabled: appReady,
+      })
+      applyGlobeTransform(wrapper, window.innerWidth)
     }
 
-    const onTick = () => {
-      tilt.x += (BASE_ROT_X + target.y * CURSOR_ROT_X - tilt.x) * 0.06
-      tilt.y += (BASE_ROT_Y + target.x * CURSOR_ROT_Y - tilt.y) * 0.06
-      applyGlobeTransform(wrapper, tilt.x, tilt.y)
-    }
+    syncLayout()
+    window.addEventListener('resize', syncLayout, { passive: true })
 
-    gsap.ticker.add(onTick)
-    window.addEventListener('mousemove', onMove, { passive: true })
-
-    return () => {
-      gsap.ticker.remove(onTick)
-      window.removeEventListener('mousemove', onMove)
-    }
-  }, [])
+    return () => window.removeEventListener('resize', syncLayout)
+  }, [appReady])
 
   const draw = useCallback(
     (
@@ -68,21 +103,23 @@ export function HeroBlob() {
       height: number,
       time: number,
     ) => {
-      drawDitheredGlobe(ctx, width, height, time, pointerRef.current, {
-        centerX: width * 0.56,
-        centerY: height * 0.58,
-        scale: 0.44,
+      const layout = layoutRef.current
+
+      drawDitheredGlobe(ctx, width, height, time, {
+        centerX: width * layout.centerX,
+        centerY: height * layout.centerY,
+        scale: layout.drawScale,
       })
     },
     [],
   )
 
-  const canvas = useCanvasSurface(draw, canvasHostRef)
+  const canvas = useCanvasSurface(draw, canvasHostRef, '', canvasOptions)
 
   return (
     <div
       ref={wrapperRef}
-      className="relative h-[min(108vh,1020px)] w-[min(108vh,1020px)] origin-center overflow-visible will-change-transform transform-gpu select-none"
+      className="relative h-full w-full origin-center overflow-visible will-change-transform transform-gpu select-none"
       aria-hidden="true"
     >
       <div ref={canvasHostRef} className="absolute -inset-[24%] overflow-visible">
