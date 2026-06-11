@@ -3,6 +3,7 @@ import { gsap } from '../../lib/gsap'
 import { SectionLabel } from '../ui/BrutalCard'
 import { WhyUsAside } from './why-us/WhyUsAside'
 import { WhyUsCarousel } from './why-us/WhyUsCarousel'
+import { OurProcess } from './why-us/OurProcess'
 
 export function WhyUsSection() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -28,9 +29,9 @@ export function WhyUsSection() {
           start: 'top 82%',
           toggleActions: 'play none none reverse',
         },
-        y: 32,
+        y: 20,
         opacity: 0,
-        duration: 0.55,
+        duration: 0.5,
         ease: 'power2.out',
         force3D: true,
       })
@@ -48,6 +49,19 @@ export function WhyUsSection() {
         ease: 'power2.out',
         force3D: true,
       })
+
+      gsap.from('[data-our-process]', {
+        scrollTrigger: {
+          trigger: '[data-our-process]',
+          start: 'top 88%',
+          toggleActions: 'play none none reverse',
+        },
+        y: 28,
+        opacity: 0,
+        duration: 0.5,
+        ease: 'power2.out',
+        force3D: true,
+      })
     }, sectionRef)
 
     return () => ctx.revert()
@@ -57,22 +71,28 @@ export function WhyUsSection() {
     <section
       ref={sectionRef}
       id="why-us"
-      className="relative min-h-screen scroll-mt-16 overflow-visible py-20 md:py-28 lg:py-32"
+      className="relative scroll-mt-16 overflow-visible py-20 md:py-28 lg:py-32"
     >
       <div className="content-layer relative z-10 mx-auto w-full max-w-container-max px-margin-mobile md:px-margin-desktop">
-        <div data-why-header className="mb-10 md:mb-12">
+        <div
+          data-why-header
+          className="relative z-20 mb-8 max-w-xs md:max-w-sm lg:absolute lg:left-0 lg:top-0 lg:mb-0"
+        >
           <SectionLabel>Core values</SectionLabel>
-          <h2 className="type-display max-w-3xl text-[36px] leading-[1.02] md:text-[56px]">
+          <h2 className="type-display text-[36px] leading-[1.02] md:text-[52px] lg:text-[56px]">
             Why us
           </h2>
-        </div>
-
-        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] lg:gap-14 xl:grid-cols-[minmax(0,460px)_minmax(0,1fr)] xl:gap-20">
-          <div data-why-aside className="lg:sticky lg:top-28">
+          <div data-why-aside className="mt-4 md:mt-5">
             <WhyUsAside />
           </div>
+        </div>
 
+        <div className="relative z-10 -mx-margin-mobile flex min-h-[min(62vh,640px)] w-[calc(100%+2*theme(spacing.margin-mobile))] items-center justify-center overflow-visible md:min-h-[min(68vh,700px)] md:-mx-margin-desktop md:w-[calc(100%+2*theme(spacing.margin-desktop))] lg:min-h-[min(78vh,760px)]">
           <WhyUsCarousel />
+        </div>
+
+        <div className="mt-16 md:mt-20 lg:mt-24">
+          <OurProcess />
         </div>
       </div>
     </section>
