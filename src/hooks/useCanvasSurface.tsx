@@ -8,7 +8,20 @@ type DrawFn = (
   dpr: number,
 ) => void
 
-const MAX_BUFFER_EDGE = 960
+export type CanvasSurfaceOptions = {
+  /** Cap internal buffer edge length (px). Lower = less GPU/CPU per frame. */
+  maxBufferEdge?: number
+  /** Target draw rate while animating. */
+  maxFps?: number
+  /** Skip draws while the user is scrolling to keep interactions responsive. */
+  pauseOnScroll?: boolean
+  /** Gate the draw loop without unmounting the canvas. */
+  enabled?: boolean
+}
+
+const DEFAULT_MAX_BUFFER_EDGE = 960
+const DEFAULT_MAX_FPS = 60
+const SCROLL_IDLE_MS = 140
 
 function measureElement(element: Element) {
   const rect = element.getBoundingClientRect()
@@ -28,10 +41,13 @@ export function useCanvasSurface(
   draw: DrawFn,
   containerRef: RefObject<HTMLElement | null>,
   className = '',
+  options: CanvasSurfaceOptions = {},
 ) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const drawRef = useRef(draw)
+  const optionsRef = useRef(options)
   drawRef.current = draw
+  optionsRef.current = options
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -48,15 +64,17 @@ export function useCanvasSurface(
     let bufferWidth = 0
     let bufferHeight = 0
     let visible = true
+    let scrolling = false
+    let scrollIdleTimer = 0
+    let lastDraw = 0
 
     const resize = () => {
       const { width: layoutWidth, height: layoutHeight } = measureElement(container)
       if (layoutWidth <= 0 || layoutHeight <= 0) return
 
-      const scale = Math.min(
-        1,
-        MAX_BUFFER_EDGE / Math.max(layoutWidth, layoutHeight),
-      )
+      const maxEdge =
+        optionsRef.current.maxBufferEdge ?? DEFAULT_MAX_BUFFER_EDGE
+      const scale = Math.min(1, maxEdge / Math.max(layoutWidth, layoutHeight))
       bufferWidth = Math.max(1, Math.round(layoutWidth * scale))
       bufferHeight = Math.max(1, Math.round(layoutHeight * scale))
 
@@ -67,9 +85,19 @@ export function useCanvasSurface(
       ctx.imageSmoothingEnabled = true
     }
 
+    const onScroll = () => {
+      if (!optionsRef.current.pauseOnScroll) return
+      scrolling = true
+      window.clearTimeout(scrollIdleTimer)
+      scrollIdleTimer = window.setTimeout(() => {
+        scrolling = false
+      }, SCROLL_IDLE_MS)
+    }
+
     const observer = new ResizeObserver(resize)
     observer.observe(container)
     window.addEventListener('resize', resize)
+    window.addEventListener('scroll', onScroll, { passive: true })
     requestAnimationFrame(resize)
 
     const visibilityObserver = new IntersectionObserver(
@@ -82,7 +110,18 @@ export function useCanvasSurface(
     visibilityObserver.observe(container)
 
     const loop = (time: number) => {
-      if (visible && bufferWidth > 0 && bufferHeight > 0) {
+      const maxFps = optionsRef.current.maxFps ?? DEFAULT_MAX_FPS
+      const frameInterval = 1000 / maxFps
+      const enabled = optionsRef.current.enabled ?? true
+      const canDraw =
+        enabled &&
+        visible &&
+        !scrolling &&
+        bufferWidth > 0 &&
+        bufferHeight > 0 &&
+        time - lastDraw >= frameInterval
+
+      if (canDraw) {
         drawRef.current(
           ctx,
           bufferWidth,
@@ -90,6 +129,7 @@ export function useCanvasSurface(
           time,
           Math.min(window.devicePixelRatio || 1, 2),
         )
+        lastDraw = time
       }
       raf = requestAnimationFrame(loop)
     }
@@ -98,9 +138,11 @@ export function useCanvasSurface(
 
     return () => {
       cancelAnimationFrame(raf)
+      window.clearTimeout(scrollIdleTimer)
       observer.disconnect()
       visibilityObserver.disconnect()
       window.removeEventListener('resize', resize)
+      window.removeEventListener('scroll', onScroll)
     }
   }, [containerRef])
 

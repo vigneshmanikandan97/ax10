@@ -62,7 +62,11 @@ export function OrganicBlobCanvas({
     [sphereScale, sphereX, sphereY, grain, atmosphere],
   )
 
-  const canvas = useCanvasSurface(draw, containerRef)
+  const canvas = useCanvasSurface(draw, containerRef, '', {
+    maxBufferEdge: 480,
+    maxFps: 30,
+    pauseOnScroll: false,
+  })
 
   return (
     <div ref={containerRef} className={`absolute inset-0 ${className}`}>

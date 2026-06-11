@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { drawAtmosphereScene, type BlobPointer } from '../../lib/organicBlob'
 import { useCanvasSurface } from '../../hooks/useCanvasSurface'
+import { useAppReady } from '../../context/AppReadyContext'
 
 /** Fixed cinematic atmosphere for the landing page — monopo-inspired, AX10 palette. */
 export function LandingAtmosphere() {
+  const appReady = useAppReady()
   const containerRef = useRef<HTMLDivElement>(null)
   const pointerRef = useRef<BlobPointer>({ x: 0, y: 0 })
   const scrollRef = useRef(0)
@@ -45,7 +47,12 @@ export function LandingAtmosphere() {
     [],
   )
 
-  const canvas = useCanvasSurface(draw, containerRef)
+  const canvas = useCanvasSurface(draw, containerRef, '', {
+    maxBufferEdge: 640,
+    maxFps: 20,
+    pauseOnScroll: true,
+    enabled: appReady,
+  })
 
   return (
     <div
