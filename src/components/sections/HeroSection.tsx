@@ -25,6 +25,7 @@ export function HeroSection() {
   return (
     <header
       ref={sectionRef}
+      data-hero-section
       className="relative flex min-h-[100svh] items-center overflow-visible pt-24"
     >
       <div className="content-layer relative z-10 mx-auto w-full max-w-container-max px-margin-mobile md:px-margin-desktop">
@@ -45,7 +46,9 @@ export function HeroSection() {
           >
             {heroCopy.headlineLead}
             <br />
-            <span className="italic text-primary">{heroCopy.headlineAccent}</span>
+            <span className="italic text-primary" data-hero-expertise>
+              {heroCopy.headlineAccent}
+            </span>
           </h1>
 
           <p
@@ -70,7 +73,7 @@ export function HeroSection() {
         </div>
       </div>
 
-      <div className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 animate-bounce opacity-40 md:block">
+      <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 animate-bounce opacity-40">
         <span className="material-symbols-outlined text-text-secondary">south</span>
       </div>
     </header>

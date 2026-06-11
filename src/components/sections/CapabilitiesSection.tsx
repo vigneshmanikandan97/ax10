@@ -65,7 +65,10 @@ export function CapabilitiesSection() {
       <div className="content-layer relative z-10 mx-auto w-full max-w-container-max px-margin-mobile md:px-margin-desktop">
         <div data-cap-header className="mb-10 md:mb-12">
           <SectionLabel>Capabilities</SectionLabel>
-          <h2 className="type-display max-w-3xl text-[36px] leading-[1.02] md:text-[56px]">
+          <h2
+            data-thread-entry
+            className="type-display max-w-3xl text-[36px] leading-[1.02] md:text-[56px]"
+          >
             {capabilitiesIntro.title}
           </h2>
         </div>

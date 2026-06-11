@@ -2,6 +2,8 @@ import { lazy, Suspense, useLayoutEffect, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AppLoader } from './components/layout/AppLoader'
 import { RouteFallback } from './components/ui/RouteFallback'
+import { ScrollThread } from './components/effects/ScrollThread'
+import { AppReadyContext } from './context/AppReadyContext'
 
 const HomePage = lazy(() =>
   import('./pages/HomePage').then((module) => ({ default: module.HomePage })),
@@ -49,14 +51,13 @@ function App() {
     return () => {
       disposed = true
       window.removeEventListener('resize', onResize)
-      void import('./lib/gsap').then(({ ScrollTrigger }) => {
-        ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
-      })
     }
   }, [isHome])
 
+  const appReady = !loading
+
   return (
-    <>
+    <AppReadyContext.Provider value={appReady}>
       {loading ? <AppLoader onComplete={() => setLoading(false)} /> : null}
       <Suspense fallback={<RouteFallback />}>
         <Routes>
@@ -66,7 +67,8 @@ function App() {
           <Route path="/contact" element={<ContactPage />} />
         </Routes>
       </Suspense>
-    </>
+      {isHome && appReady ? <ScrollThread key={location.key} /> : null}
+    </AppReadyContext.Provider>
   )
 }
 
