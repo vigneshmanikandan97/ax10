@@ -83,9 +83,21 @@ export const whyUsProcess = {
   headline: 'You dream it. We build it.',
   body: 'No theatre. No filler phases. We scope the work, show progress early, and ship production code your team can run.',
   steps: [
-    'You bring the problem and the outcome',
-    'We design, build, and validate in the open',
-    'You get working software, not a slide deck',
+    {
+      title: 'You bring the problem and the outcome',
+      description:
+        'Tell us what is broken and what success looks like. We ask the awkward questions early, agree on scope, and put a realistic timeline on the table before a single line of code is written.',
+    },
+    {
+      title: 'We design, build, and validate in the open',
+      description:
+        'You see work in progress every week, not a big reveal at the end. Demos run on real data, your feedback lands directly in the build, and nothing disappears into a black box.',
+    },
+    {
+      title: 'You get working software, not a slide deck',
+      description:
+        'We hand over production code your team can read, run, and extend. Documentation, deploy pipelines and a proper walkthrough come included, so you own it from day one.',
+    },
   ],
 } as const
 
