@@ -122,7 +122,7 @@ export function HeroBlob() {
       className="relative h-full w-full origin-center overflow-visible will-change-transform transform-gpu select-none"
       aria-hidden="true"
     >
-      <div ref={canvasHostRef} className="absolute -inset-[24%] overflow-visible">
+      <div ref={canvasHostRef} className="absolute -inset-[12%] sm:-inset-[16%] md:-inset-[20%] lg:-inset-[24%] overflow-visible">
         {canvas}
       </div>
     </div>
