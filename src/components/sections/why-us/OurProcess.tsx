@@ -5,48 +5,65 @@ import { SectionLabel } from '../../ui/BrutalCard'
 
 const processSteps = whyUsProcess.steps.map((step, index) => ({
   index: String(index + 1).padStart(2, '0'),
-  label: step,
+  title: step.title,
+  description: step.description,
 }))
+
+const MAX_TILT = 3.5
+const MAX_SKEW = 1.2
+
+type TiltSetters = {
+  rotateX: (value: number) => void
+  rotateY: (value: number) => void
+  skewX: (value: number) => void
+}
 
 export function OurProcess() {
   const cardRefs = useRef<Array<HTMLDivElement | null>>([])
+  const settersRef = useRef<Map<number, TiltSetters>>(new Map())
 
-  const handleEnter = (event: React.MouseEvent<HTMLDivElement>, index: number) => {
+  const getSetters = (index: number): TiltSetters | null => {
+    const card = cardRefs.current[index]
+    if (!card) return null
+
+    let setters = settersRef.current.get(index)
+    if (!setters) {
+      const config = { duration: 0.35, ease: 'power2.out' }
+      setters = {
+        rotateX: gsap.quickTo(card, 'rotateX', config),
+        rotateY: gsap.quickTo(card, 'rotateY', config),
+        skewX: gsap.quickTo(card, 'skewX', config),
+      }
+      settersRef.current.set(index, setters)
+    }
+    return setters
+  }
+
+  const handleMove = (event: React.MouseEvent<HTMLDivElement>, index: number) => {
     const card = cardRefs.current[index]
     if (!card) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    const rect = card.getBoundingClientRect()
-    // Normalized entry offset from card center, -1..1
-    const dx = Math.max(-1, Math.min(1, (event.clientX - (rect.left + rect.width / 2)) / (rect.width / 2)))
-    const dy = Math.max(-1, Math.min(1, (event.clientY - (rect.top + rect.height / 2)) / (rect.height / 2)))
+    const setters = getSetters(index)
+    if (!setters) return
 
-    gsap.to(card, {
-      x: -dx * 14,
-      y: -dy * 10,
-      rotateY: -dx * 7,
-      rotateX: dy * 7,
-      skewX: -dx * 3,
-      duration: 0.45,
-      ease: 'power3.out',
-      overwrite: true,
-    })
+    const rect = card.getBoundingClientRect()
+    const dx = ((event.clientX - rect.left) / rect.width) * 2 - 1
+    const dy = ((event.clientY - rect.top) / rect.height) * 2 - 1
+
+    // Repel: the edge under the cursor leans away from the viewer
+    setters.rotateY(dx * MAX_TILT)
+    setters.rotateX(-dy * MAX_TILT)
+    setters.skewX(-dx * MAX_SKEW)
   }
 
   const handleLeave = (index: number) => {
-    const card = cardRefs.current[index]
-    if (!card) return
+    const setters = getSetters(index)
+    if (!setters) return
 
-    gsap.to(card, {
-      x: 0,
-      y: 0,
-      rotateY: 0,
-      rotateX: 0,
-      skewX: 0,
-      duration: 0.7,
-      ease: 'elastic.out(1, 0.55)',
-      overwrite: true,
-    })
+    setters.rotateX(0)
+    setters.rotateY(0)
+    setters.skewX(0)
   }
 
   return (
@@ -62,7 +79,7 @@ export function OurProcess() {
       </div>
 
       <div
-        className="grid gap-4 md:grid-cols-3 md:gap-5 [perspective:1200px]"
+        className="grid gap-4 md:grid-cols-3 md:gap-5 [perspective:1400px]"
         role="list"
         aria-label="Our delivery process"
       >
@@ -73,9 +90,9 @@ export function OurProcess() {
               cardRefs.current[index] = el
             }}
             role="listitem"
-            onMouseEnter={(event) => handleEnter(event, index)}
+            onMouseMove={(event) => handleMove(event, index)}
             onMouseLeave={() => handleLeave(index)}
-            className="group liquid-glass flex min-h-[150px] flex-col justify-between p-5 transition-colors duration-300 hover:border-primary/40 md:min-h-[190px] md:p-6 [transform-style:preserve-3d]"
+            className="group liquid-glass flex flex-col p-5 transition-colors duration-300 hover:border-primary/40 md:p-6 [transform-style:preserve-3d]"
           >
             <div className="flex items-center gap-3">
               <span className="font-label-mono text-lg tabular-nums text-primary/40 transition-colors duration-300 group-hover:text-primary md:text-xl">
@@ -87,8 +104,12 @@ export function OurProcess() {
               />
             </div>
 
-            <p className="mt-6 font-label-mono text-[10px] uppercase leading-relaxed tracking-[0.14em] text-text-secondary transition-colors duration-300 group-hover:text-text-primary md:text-[11px] md:tracking-[0.12em]">
-              {step.label}
+            <p className="mt-5 font-label-mono text-[10px] uppercase leading-relaxed tracking-[0.14em] text-text-primary md:mt-6 md:text-[11px] md:tracking-[0.12em]">
+              {step.title}
+            </p>
+
+            <p className="type-body mt-3 text-[13px] leading-relaxed text-text-secondary md:text-sm">
+              {step.description}
             </p>
           </div>
         ))}
