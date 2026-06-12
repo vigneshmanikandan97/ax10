@@ -3,7 +3,7 @@ import { drawDitheredGlobe } from '../../lib/ditheredGlobe'
 import { useCanvasSurface } from '../../hooks/useCanvasSurface'
 import { useAppReady } from '../../context/AppReadyContext'
 
-const GLOBE_FPS = 24
+const GLOBE_FPS = 60
 
 const BASE_ROT_X = 6
 const BASE_ROT_Y = -14
