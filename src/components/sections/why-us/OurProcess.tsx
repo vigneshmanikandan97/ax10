@@ -1,4 +1,5 @@
-import { useLayoutEffect, useState } from 'react'
+import { useRef } from 'react'
+import { gsap } from '../../../lib/gsap'
 import { whyUsProcess } from '../../../data/content'
 import { SectionLabel } from '../../ui/BrutalCard'
 
@@ -7,21 +8,46 @@ const processSteps = whyUsProcess.steps.map((step, index) => ({
   label: step,
 }))
 
-const STEP_DELAY = 5200
-
 export function OurProcess() {
-  const [activeIndex, setActiveIndex] = useState(0)
+  const cardRefs = useRef<Array<HTMLDivElement | null>>([])
 
-  useLayoutEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduced) return
+  const handleEnter = (event: React.MouseEvent<HTMLDivElement>, index: number) => {
+    const card = cardRefs.current[index]
+    if (!card) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    const interval = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % processSteps.length)
-    }, STEP_DELAY)
+    const rect = card.getBoundingClientRect()
+    // Normalized entry offset from card center, -1..1
+    const dx = Math.max(-1, Math.min(1, (event.clientX - (rect.left + rect.width / 2)) / (rect.width / 2)))
+    const dy = Math.max(-1, Math.min(1, (event.clientY - (rect.top + rect.height / 2)) / (rect.height / 2)))
 
-    return () => window.clearInterval(interval)
-  }, [])
+    gsap.to(card, {
+      x: -dx * 14,
+      y: -dy * 10,
+      rotateY: -dx * 7,
+      rotateX: dy * 7,
+      skewX: -dx * 3,
+      duration: 0.45,
+      ease: 'power3.out',
+      overwrite: true,
+    })
+  }
+
+  const handleLeave = (index: number) => {
+    const card = cardRefs.current[index]
+    if (!card) return
+
+    gsap.to(card, {
+      x: 0,
+      y: 0,
+      rotateY: 0,
+      rotateX: 0,
+      skewX: 0,
+      duration: 0.7,
+      ease: 'elastic.out(1, 0.55)',
+      overwrite: true,
+    })
+  }
 
   return (
     <div data-our-process className="border-t border-white/[0.06] pt-14 md:pt-20">
@@ -36,59 +62,36 @@ export function OurProcess() {
       </div>
 
       <div
-        className="liquid-glass max-w-3xl p-2 md:p-3"
-        role="tablist"
+        className="grid gap-4 md:grid-cols-3 md:gap-5 [perspective:1200px]"
+        role="list"
         aria-label="Our delivery process"
       >
-        {processSteps.map((step, index) => {
-          const isActive = index === activeIndex
+        {processSteps.map((step, index) => (
+          <div
+            key={step.index}
+            ref={(el) => {
+              cardRefs.current[index] = el
+            }}
+            role="listitem"
+            onMouseEnter={(event) => handleEnter(event, index)}
+            onMouseLeave={() => handleLeave(index)}
+            className="group liquid-glass flex min-h-[150px] flex-col justify-between p-5 transition-colors duration-300 hover:border-primary/40 md:min-h-[190px] md:p-6 [transform-style:preserve-3d]"
+          >
+            <div className="flex items-center gap-3">
+              <span className="font-label-mono text-lg tabular-nums text-primary/40 transition-colors duration-300 group-hover:text-primary md:text-xl">
+                {step.index}
+              </span>
+              <span
+                className="h-px w-6 bg-border-subtle transition-all duration-300 group-hover:w-10 group-hover:bg-primary/60"
+                aria-hidden="true"
+              />
+            </div>
 
-          return (
-            <button
-              key={step.index}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              onMouseEnter={() => setActiveIndex(index)}
-              onFocus={() => setActiveIndex(index)}
-              onClick={() => setActiveIndex(index)}
-              className={`group relative z-[1] w-full border-2 px-4 py-4 text-left transition-all duration-300 md:px-6 md:py-5 ${
-                isActive
-                  ? 'border-primary bg-surface/50 shadow-[4px_4px_0_0_rgba(105,201,145,0.28)] backdrop-blur-md'
-                  : 'border-transparent hover:border-white/10 hover:bg-surface/20'
-              }`}
-            >
-              <div className="flex items-center gap-3 md:gap-4">
-                <span
-                  className={`shrink-0 font-label-mono text-sm tabular-nums transition-colors md:text-base ${
-                    isActive ? 'text-primary' : 'text-primary/30 group-hover:text-primary/50'
-                  }`}
-                >
-                  {step.index}
-                </span>
-
-                <span
-                  className={`h-px shrink-0 transition-all duration-300 ${
-                    isActive
-                      ? 'w-8 bg-primary/70 md:w-10'
-                      : 'w-5 bg-border-subtle group-hover:w-7 group-hover:bg-primary/25'
-                  }`}
-                  aria-hidden="true"
-                />
-
-                <span
-                  className={`font-label-mono text-[10px] uppercase leading-snug tracking-[0.14em] md:text-[11px] md:tracking-[0.12em] ${
-                    isActive
-                      ? 'text-text-primary'
-                      : 'text-text-muted group-hover:text-text-secondary'
-                  }`}
-                >
-                  {step.label}
-                </span>
-              </div>
-            </button>
-          )
-        })}
+            <p className="mt-6 font-label-mono text-[10px] uppercase leading-relaxed tracking-[0.14em] text-text-secondary transition-colors duration-300 group-hover:text-text-primary md:text-[11px] md:tracking-[0.12em]">
+              {step.label}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   )
