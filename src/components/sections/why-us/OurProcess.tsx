@@ -50,7 +50,7 @@ export function OurProcess() {
   }
 
   return (
-    <div data-our-process className="border-t border-white/[0.06] pt-14 md:pt-20">
+    <div data-our-process className="border-t border-white/[0.06] pt-8 md:pt-10">
       <div className="mb-8 md:mb-10">
         <SectionLabel>Our process</SectionLabel>
         <h3 className="type-display max-w-2xl text-[30px] leading-[1.04] md:text-[44px]">

@@ -87,11 +87,11 @@ export function WhyUsSection() {
           </div>
         </div>
 
-        <div className="relative z-10 -mx-margin-mobile flex min-h-[min(62vh,640px)] w-[calc(100%+2*theme(spacing.margin-mobile))] items-center justify-center overflow-visible md:min-h-[min(68vh,700px)] md:-mx-margin-desktop md:w-[calc(100%+2*theme(spacing.margin-desktop))] lg:min-h-[min(78vh,760px)]">
+        <div className="relative z-10 -mx-margin-mobile flex min-h-[min(52vh,540px)] w-[calc(100%+2*theme(spacing.margin-mobile))] items-center justify-center overflow-visible md:min-h-[min(56vh,580px)] md:-mx-margin-desktop md:w-[calc(100%+2*theme(spacing.margin-desktop))] lg:min-h-[min(60vh,620px)]">
           <WhyUsCarousel />
         </div>
 
-        <div className="mt-16 md:mt-20 lg:mt-24">
+        <div className="mt-8 md:mt-10">
           <OurProcess />
         </div>
       </div>
