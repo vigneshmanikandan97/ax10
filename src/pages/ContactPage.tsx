@@ -24,7 +24,7 @@ export function ContactPage() {
       subtitle="Tell us about your project. We usually reply within one business day."
     >
       {sent ? (
-        <div className="mb-8 border-2 border-primary bg-primary/10 p-6 shadow-brutal-primary-sm">
+        <div className="mb-8 rounded-xl border-2 border-primary bg-primary/10 p-6 shadow-brutal-primary-sm">
           <p className="font-label-mono text-label-mono text-primary">
             Message sent successfully. We&apos;ll be in touch soon.
           </p>
@@ -52,7 +52,7 @@ export function ContactPage() {
               id="name"
               name="name"
               required
-              className="w-full border-2 border-border-subtle bg-surface px-4 py-3 text-text-primary outline-none transition-colors focus:border-primary"
+              className="w-full rounded-xl border-2 border-border-subtle bg-surface px-4 py-3 text-text-primary outline-none transition-colors focus:border-primary"
               placeholder="Your name"
             />
           </div>
@@ -66,7 +66,7 @@ export function ContactPage() {
               name="email"
               type="email"
               required
-              className="w-full border-2 border-border-subtle bg-surface px-4 py-3 text-text-primary outline-none transition-colors focus:border-primary"
+              className="w-full rounded-xl border-2 border-border-subtle bg-surface px-4 py-3 text-text-primary outline-none transition-colors focus:border-primary"
               placeholder="you@company.com"
             />
           </div>
@@ -78,7 +78,7 @@ export function ContactPage() {
             <input
               id="company"
               name="company"
-              className="w-full border-2 border-border-subtle bg-surface px-4 py-3 text-text-primary outline-none transition-colors focus:border-primary"
+              className="w-full rounded-xl border-2 border-border-subtle bg-surface px-4 py-3 text-text-primary outline-none transition-colors focus:border-primary"
               placeholder="Company name"
             />
           </div>
@@ -92,7 +92,7 @@ export function ContactPage() {
               name="message"
               required
               rows={6}
-              className="w-full resize-y border-2 border-border-subtle bg-surface px-4 py-3 text-text-primary outline-none transition-colors focus:border-primary"
+              className="w-full resize-y rounded-xl border-2 border-border-subtle bg-surface px-4 py-3 text-text-primary outline-none transition-colors focus:border-primary"
               placeholder="What problem are you trying to solve?"
             />
           </div>
@@ -107,7 +107,7 @@ export function ContactPage() {
           </BrutalButton>
         </form>
 
-        <aside className="space-y-6 border-2 border-border-subtle bg-surface p-6 shadow-brutal-dark">
+        <aside className="space-y-6 rounded-2xl border-2 border-border-subtle bg-surface p-6 shadow-brutal-dark">
           <div>
             <h3 className="mb-2 font-label-mono text-[10px] uppercase text-primary">
               Project enquiries

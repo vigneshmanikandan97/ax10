@@ -90,7 +90,7 @@ export function TestimonialsSection() {
                   &ldquo;{t.quote}&rdquo;
                 </p>
                 <div className="flex items-center gap-4 border-t-2 border-border-subtle pt-4 md:pt-6">
-                  <div className="flex h-10 w-10 items-center justify-center border-2 border-primary bg-primary/20 font-label-mono text-xs text-primary">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-primary bg-primary/20 font-label-mono text-xs text-primary">
                     {t.initials}
                   </div>
                   <div>

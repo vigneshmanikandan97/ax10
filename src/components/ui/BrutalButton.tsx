@@ -21,7 +21,7 @@ export function BrutalButton({
   onClick,
 }: BrutalButtonProps) {
   const base =
-    'inline-flex items-center justify-center gap-3 border-2 px-8 py-3 font-label-mono text-label-mono font-bold uppercase tracking-wider transition-transform duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5'
+    'inline-flex items-center justify-center gap-3 rounded-xl border-2 px-8 py-3 font-label-mono text-label-mono font-bold uppercase tracking-wider transition-transform duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5'
 
   const styles =
     variant === 'primary'

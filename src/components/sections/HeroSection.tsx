@@ -33,7 +33,7 @@ export function HeroSection() {
         <div className="relative max-w-3xl">
           <div
             data-hero-item
-            className="mb-6 inline-flex items-center gap-3 border-2 border-primary/40 bg-surface/85 px-3 py-1.5 shadow-brutal-primary-sm md:mb-8"
+            className="mb-6 inline-flex items-center gap-3 rounded-lg border-2 border-primary/40 bg-surface/85 px-3 py-1.5 shadow-brutal-primary-sm md:mb-8"
           >
             <span className="h-2 w-2 animate-pulse bg-primary" />
             <span className="font-label-mono text-label-caps text-primary uppercase">

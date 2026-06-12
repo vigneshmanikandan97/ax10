@@ -42,7 +42,7 @@ export function CapabilitiesAside() {
               onMouseEnter={() => setActiveIndex(index)}
               onFocus={() => setActiveIndex(index)}
               onClick={() => setActiveIndex(index)}
-              className={`relative z-[1] w-full border-2 px-4 py-4 text-left transition-colors md:px-5 md:py-5 ${
+              className={`relative z-[1] w-full rounded-xl border-2 px-4 py-4 text-left transition-colors md:px-5 md:py-5 ${
                 isActive
                   ? 'border-primary bg-surface/45 shadow-brutal-primary-sm backdrop-blur-md'
                   : 'border-transparent hover:border-white/10 hover:bg-surface/25'
