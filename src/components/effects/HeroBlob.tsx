@@ -69,7 +69,7 @@ export function HeroBlob() {
     return {
       maxBufferEdge: layout.maxBufferEdge,
       maxFps: layout.maxFps,
-      pauseOnScroll: false,
+      pauseOnScroll: true,
       enabled: appReady,
     }
   })
@@ -84,7 +84,7 @@ export function HeroBlob() {
       setCanvasOptions({
         maxBufferEdge: layout.maxBufferEdge,
         maxFps: layout.maxFps,
-        pauseOnScroll: false,
+        pauseOnScroll: true,
         enabled: appReady,
       })
       applyGlobeTransform(wrapper, window.innerWidth)
