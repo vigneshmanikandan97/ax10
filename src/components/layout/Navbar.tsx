@@ -86,7 +86,7 @@ export function Navbar() {
                 className={`flex h-9 w-9 items-center justify-center text-text-primary transition-colors md:hidden ${
                   scrolled
                     ? 'rounded-full hover:bg-white/5'
-                    : 'border border-white/10 bg-surface/20 hover:border-primary/40'
+                    : 'rounded-lg border border-white/10 bg-surface/20 hover:border-primary/40'
                 }`}
                 aria-label={open ? 'Close menu' : 'Open menu'}
                 aria-expanded={open}

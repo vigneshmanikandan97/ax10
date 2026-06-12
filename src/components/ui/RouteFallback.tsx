@@ -6,7 +6,7 @@ export function RouteFallback() {
       aria-busy="true"
       aria-label="Loading page"
     >
-      <div className="h-8 w-8 animate-pulse border-2 border-primary/40 bg-surface/40" />
+      <div className="h-8 w-8 animate-pulse rounded-lg border-2 border-primary/40 bg-surface/40" />
     </div>
   )
 }
