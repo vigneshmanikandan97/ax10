@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react'
 import { gsap } from '../../lib/gsap'
 import { heroCopy } from '../../data/content'
 import { BrutalButton } from '../ui/BrutalButton'
+import { scrollToSection } from '../../lib/scroll'
 
 export function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -63,10 +64,14 @@ export function HeroSection() {
               Let&apos;s Talk
               <span className="material-symbols-outlined text-sm">north_east</span>
             </BrutalButton>
-            <BrutalButton variant="ghost" to="/contact" className="w-full sm:w-auto">
-              Start a project
-              <span className="material-symbols-outlined text-sm">
-                auto_awesome_motion
+            <BrutalButton
+              variant="ghost"
+              className="group w-full sm:w-auto"
+              onClick={() => scrollToSection('#what-we-do')}
+            >
+              See What We Do
+              <span className="material-symbols-outlined text-sm transition-transform duration-200 group-hover:translate-y-0.5">
+                south
               </span>
             </BrutalButton>
           </div>
