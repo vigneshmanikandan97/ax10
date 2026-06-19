@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from '../../lib/gsap'
-import { OrganicBlobCanvas } from '../effects/OrganicBlobCanvas'
+import { LanternField } from '../effects/LanternField'
 
 const MIN_LOADER_MS = 2200
 
@@ -106,13 +106,7 @@ export function AppLoader({ onComplete }: { onComplete: () => void }) {
       aria-busy={progress < 100}
       aria-label="Loading AX10"
     >
-      <OrganicBlobCanvas
-        progress={Math.max(0.35, progress / 100)}
-        sphereScale={0.38}
-        sphereX={0.68}
-        sphereY={0.5}
-        grain={0.08}
-      />
+      <LanternField enabled={visible} />
 
       <div className="relative z-10 px-6 text-center">
         <div
