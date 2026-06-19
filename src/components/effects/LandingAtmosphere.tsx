@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { drawAtmosphereScene, type BlobPointer } from '../../lib/organicBlob'
+import type { BlobPointer } from '../../lib/organicBlob'
+import { drawGradientField } from '../../lib/gradientField'
 import { useCanvasSurface } from '../../hooks/useCanvasSurface'
 import { useAppReady } from '../../context/AppReadyContext'
 
@@ -39,9 +40,9 @@ export function LandingAtmosphere() {
       height: number,
       time: number,
     ) => {
-      drawAtmosphereScene(ctx, width, height, time, pointerRef.current, {
+      drawGradientField(ctx, width, height, time, pointerRef.current, {
         scrollY: scrollRef.current,
-        grain: 0.09,
+        grain: 0.06,
       })
     },
     [],
