@@ -10,6 +10,9 @@ type DrawFn = (
 ) => void
 
 const MAX_BUFFER_EDGE = 960
+// Decorative section backdrops don't need more than ~48fps; cap so high-refresh
+// (120/144Hz) displays don't burn frames redrawing them every vsync.
+const MAX_FPS = 48
 
 function measureHost(host: Element) {
   const section = host.closest('section')
@@ -54,6 +57,8 @@ export function useCanvasLoop(draw: DrawFn, className?: string) {
     let bufferHeight = 0
     let skipDraw = isCanvasPaused()
     let visible = true
+    let lastDraw = 0
+    const frameInterval = 1000 / MAX_FPS
 
     const unsubPause = subscribeCanvasPause(() => {
       skipDraw = isCanvasPaused()
@@ -115,12 +120,18 @@ export function useCanvasLoop(draw: DrawFn, className?: string) {
         visible = entry?.isIntersecting ?? true
         if (visible) resize()
       },
-      { root: null, threshold: 0.01 },
+      { root: null, threshold: 0.15 },
     )
     visibilityObserver.observe(section ?? host)
 
     const loop = (time: number) => {
-      if (!skipDraw && visible && bufferWidth > 0 && bufferHeight > 0) {
+      if (
+        !skipDraw &&
+        visible &&
+        bufferWidth > 0 &&
+        bufferHeight > 0 &&
+        time - lastDraw >= frameInterval
+      ) {
         drawRef.current(
           ctx,
           bufferWidth,
@@ -128,6 +139,7 @@ export function useCanvasLoop(draw: DrawFn, className?: string) {
           time,
           Math.min(window.devicePixelRatio || 1, 2),
         )
+        lastDraw = time
       }
       raf = requestAnimationFrame(loop)
     }
