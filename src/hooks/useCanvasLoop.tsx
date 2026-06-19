@@ -120,7 +120,7 @@ export function useCanvasLoop(draw: DrawFn, className?: string) {
         visible = entry?.isIntersecting ?? true
         if (visible) resize()
       },
-      { root: null, threshold: 0.15 },
+      { root: null, threshold: 0.01 },
     )
     visibilityObserver.observe(section ?? host)
 
