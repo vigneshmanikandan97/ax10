@@ -39,7 +39,34 @@ export function LazyMount({
     )
 
     observer.observe(host)
-    return () => observer.disconnect()
+
+    // Fallback: mount during idle even if never scrolled into view, so the page
+    // settles to its final height shortly after load. Scroll-driven effects
+    // (ScrollThread) then build stable geometry once instead of jittering as
+    // sections mount mid-scroll. Children still gate their own heavy work
+    // (canvas loops) via internal IntersectionObservers, so idle mount only
+    // adds cheap DOM.
+    const idleWindow = window as typeof window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
+      cancelIdleCallback?: (id: number) => void
+    }
+    let idleId = 0
+    let timeoutId = 0
+    const mountNow = () => {
+      setVisible(true)
+      observer.disconnect()
+    }
+    if (typeof idleWindow.requestIdleCallback === 'function') {
+      idleId = idleWindow.requestIdleCallback(mountNow, { timeout: 2000 })
+    } else {
+      timeoutId = window.setTimeout(mountNow, 1200)
+    }
+
+    return () => {
+      observer.disconnect()
+      if (idleId && idleWindow.cancelIdleCallback) idleWindow.cancelIdleCallback(idleId)
+      window.clearTimeout(timeoutId)
+    }
   }, [rootMargin])
 
   return (
