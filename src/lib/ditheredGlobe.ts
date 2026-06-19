@@ -8,6 +8,11 @@ const BAYER_4 = [
 type Vec3 = { x: number; y: number; z: number }
 type Point2 = { x: number; y: number; z: number }
 
+// Coarsen the dither grid on low-core devices — (3/2)^2 ≈ 2.25x fewer pixel
+// iterations per frame, traded against a slightly chunkier sphere.
+const LOW_END =
+  typeof navigator !== 'undefined' && (navigator.hardwareConcurrency ?? 8) <= 4
+
 function hash(x: number, y: number) {
   const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453
   return s - Math.floor(s)
@@ -127,53 +132,60 @@ function screenToSphere(
   return v
 }
 
-function buildGraticulePaths(
+// Base graticule grid points are fixed in model space — only the per-frame
+// rotation changes. Precompute the lat/lon vectors once so the draw loop skips
+// ~1.5k latLonToVec3 (sin/cos) calls every frame.
+function buildGraticuleGrid() {
+  const latLines: Vec3[][] = []
+  const lonLines: Vec3[][] = []
+
+  for (let lat = -75; lat <= 75; lat += 15) {
+    const line: Vec3[] = []
+    for (let lon = 0; lon <= 360; lon += 5) {
+      line.push(latLonToVec3(lat, lon))
+    }
+    latLines.push(line)
+  }
+
+  for (let lon = 0; lon < 360; lon += 20) {
+    const line: Vec3[] = []
+    for (let lat = -90; lat <= 90; lat += 5) {
+      line.push(latLonToVec3(lat, lon))
+    }
+    lonLines.push(line)
+  }
+
+  return { latLines, lonLines }
+}
+
+const GRATICULE_GRID = buildGraticuleGrid()
+
+function buildGraticulePath2Ds(
+  lines: Vec3[][],
   cx: number,
   cy: number,
   radius: number,
   rotY: number,
   rotX: number,
 ) {
-  const latLines: string[] = []
-  const lonLines: string[] = []
+  const paths: Path2D[] = []
 
-  for (let lat = -75; lat <= 75; lat += 15) {
-    const points: Point2[] = []
-    for (let lon = 0; lon <= 360; lon += 5) {
-      let v = latLonToVec3(lat, lon)
-      v = rotateY(v, rotY)
+  for (const line of lines) {
+    const path = new Path2D()
+    let count = 0
+    for (const base of line) {
+      let v = rotateY(base, rotY)
       v = rotateX(v, rotX)
       const p = project(v, cx, cy, radius)
-      if (p) points.push(p)
+      if (!p) continue
+      if (count === 0) path.moveTo(p.x, p.y)
+      else path.lineTo(p.x, p.y)
+      count += 1
     }
-    if (points.length > 2) {
-      latLines.push(
-        points
-          .map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`)
-          .join(' '),
-      )
-    }
+    if (count > 2) paths.push(path)
   }
 
-  for (let lon = 0; lon < 360; lon += 20) {
-    const points: Point2[] = []
-    for (let lat = -90; lat <= 90; lat += 5) {
-      let v = latLonToVec3(lat, lon)
-      v = rotateY(v, rotY)
-      v = rotateX(v, rotX)
-      const p = project(v, cx, cy, radius)
-      if (p) points.push(p)
-    }
-    if (points.length > 2) {
-      lonLines.push(
-        points
-          .map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`)
-          .join(' '),
-      )
-    }
-  }
-
-  return { latLines, lonLines }
+  return paths
 }
 
 export function drawDitheredGlobe(
@@ -211,7 +223,7 @@ export function drawDitheredGlobe(
   ctx.arc(centerX, centerY, radius * 1.28, 0, Math.PI * 2)
   ctx.fill()
 
-  const step = width > 520 ? 2 : 3
+  const step = width > 520 ? (LOW_END ? 3 : 2) : LOW_END ? 4 : 3
   const minX = Math.floor(centerX - radius * 1.08)
   const maxX = Math.ceil(centerX + radius * 1.08)
   const minY = Math.floor(centerY - radius * 1.08)
@@ -242,7 +254,16 @@ export function drawDitheredGlobe(
     }
   }
 
-  const { latLines, lonLines } = buildGraticulePaths(
+  const latPaths = buildGraticulePath2Ds(
+    GRATICULE_GRID.latLines,
+    centerX,
+    centerY,
+    radius,
+    rotY,
+    rotX,
+  )
+  const lonPaths = buildGraticulePath2Ds(
+    GRATICULE_GRID.lonLines,
     centerX,
     centerY,
     radius,
@@ -254,14 +275,8 @@ export function drawDitheredGlobe(
   ctx.strokeStyle = 'rgba(159, 255, 176, 0.22)'
   ctx.lineWidth = 0.75
   ctx.setLineDash([2, 5])
-  for (const d of latLines) {
-    ctx.beginPath()
-    ctx.stroke(new Path2D(d))
-  }
-  for (const d of lonLines) {
-    ctx.beginPath()
-    ctx.stroke(new Path2D(d))
-  }
+  for (const path of latPaths) ctx.stroke(path)
+  for (const path of lonPaths) ctx.stroke(path)
   ctx.setLineDash([])
   ctx.restore()
 

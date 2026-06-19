@@ -105,7 +105,7 @@ export function useCanvasSurface(
         visible = entry?.isIntersecting ?? true
         if (visible) resize()
       },
-      { threshold: 0.01 },
+      { threshold: 0.2 },
     )
     visibilityObserver.observe(container)
 
