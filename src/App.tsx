@@ -29,30 +29,29 @@ function App() {
     window.scrollTo(0, 0)
     if (!isHome) return
 
-    void import('./lib/gsap').then(({ ScrollTrigger }) => ScrollTrigger.refresh())
-  }, [location.pathname, isHome])
-
-  useLayoutEffect(() => {
-    if (!isHome) return
-
     let disposed = false
+    const refresh = () =>
+      void import('./lib/gsap').then(({ ScrollTrigger }) => {
+        if (disposed) return
+        ScrollTrigger.refresh()
+      })
 
-    void import('./lib/gsap').then(({ ScrollTrigger }) => {
-      if (disposed) return
-      ScrollTrigger.refresh()
-    })
+    refresh()
 
+    let resizeTimer: number | undefined
     const onResize = () => {
-      void import('./lib/gsap').then(({ ScrollTrigger }) => ScrollTrigger.refresh())
+      window.clearTimeout(resizeTimer)
+      resizeTimer = window.setTimeout(refresh, 150)
     }
 
     window.addEventListener('resize', onResize)
 
     return () => {
       disposed = true
+      window.clearTimeout(resizeTimer)
       window.removeEventListener('resize', onResize)
     }
-  }, [isHome])
+  }, [location.pathname, isHome])
 
   const appReady = !loading
 
