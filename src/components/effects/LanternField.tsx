@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useCanvasSurface } from '../../hooks/useCanvasSurface'
+import { useCoarsePointer } from '../../hooks/useCoarsePointer'
 
 type Pointer = { x: number; y: number; active: boolean }
 
@@ -17,6 +18,7 @@ const LANTERN_RADIUS = 0.26 // fraction of min(w, h)
  * them. Falls back to an auto-roaming lantern when no pointer is present.
  */
 export function LanternField({ enabled = true }: { enabled?: boolean }) {
+  const coarse = useCoarsePointer()
   const containerRef = useRef<HTMLDivElement>(null)
   const pointerRef = useRef<Pointer>({ x: 0.5, y: 0.5, active: false })
   const reducedRef = useRef(false)
@@ -110,8 +112,8 @@ export function LanternField({ enabled = true }: { enabled?: boolean }) {
   )
 
   const canvas = useCanvasSurface(draw, containerRef, '', {
-    maxBufferEdge: 1000,
-    maxFps: 40,
+    maxBufferEdge: coarse ? 500 : 1000,
+    maxFps: coarse ? 24 : 40,
     pauseOnScroll: false,
     enabled,
   })

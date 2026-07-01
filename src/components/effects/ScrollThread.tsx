@@ -118,17 +118,20 @@ function buildSwingPath(
   const offRight = width + (narrow ? 28 : tablet ? 52 : 68)
   const span = Math.max(end.y - entry.y, 220)
 
+  // Start inside the sphere itself. The globe is drawn centered in its box, so
+  // anchoring near the box center keeps the thread origin on the visible blob
+  // regardless of how the globe is scaled or offset per breakpoint.
   const origin: Point = {
-    x: globe.left + globe.width * 0.14,
-    y: globe.top + globe.height * 0.56,
+    x: globe.left + globe.width * 0.44,
+    y: globe.top + globe.height * 0.5,
   }
 
   const waypoints: Point[] = [
     origin,
-    // peel off the globe toward the left edge
+    // peel out of the globe toward the left edge
     {
-      x: globe.left + globe.width * 0.02,
-      y: globe.top + globe.height * 0.72,
+      x: globe.left + globe.width * 0.16,
+      y: globe.top + globe.height * 0.74,
     },
     // arc outside the left viewport
     {

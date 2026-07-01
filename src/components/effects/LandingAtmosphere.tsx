@@ -3,10 +3,10 @@ import type { BlobPointer } from '../../lib/organicBlob'
 import { drawGradientField } from '../../lib/gradientField'
 import { useCanvasSurface } from '../../hooks/useCanvasSurface'
 import { useAppReady } from '../../context/AppReadyContext'
+import { useCoarsePointer } from '../../hooks/useCoarsePointer'
 
-/** Fixed cinematic atmosphere for the landing page — monopo-inspired, AX10 palette. */
-export function LandingAtmosphere() {
-  const appReady = useAppReady()
+/** Animated canvas layer. Split out so it only mounts (and runs its RAF) when wanted. */
+function AtmosphereCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
   const pointerRef = useRef<BlobPointer>({ x: 0, y: 0 })
   const scrollRef = useRef(0)
@@ -52,16 +52,26 @@ export function LandingAtmosphere() {
     maxBufferEdge: 640,
     maxFps: 20,
     pauseOnScroll: true,
-    enabled: appReady,
   })
 
   return (
+    <div ref={containerRef} className="absolute inset-0 overflow-hidden">
+      {canvas}
+    </div>
+  )
+}
+
+/** Fixed cinematic atmosphere for the landing page — monopo-inspired, AX10 palette. */
+export function LandingAtmosphere() {
+  const appReady = useAppReady()
+  const coarse = useCoarsePointer()
+
+  return (
     <div
-      ref={containerRef}
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-surface-deep"
       aria-hidden="true"
     >
-      {canvas}
+      {appReady && !coarse ? <AtmosphereCanvas /> : null}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_42%,rgba(8,9,10,0.35)_100%)]" />
     </div>
   )

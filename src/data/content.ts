@@ -14,6 +14,7 @@ export const footerLinks = [
 
 export const CONTACT_EMAIL = 'enquiries@ax10.in'
 export const SUPPORT_EMAIL = 'support@ax10.in'
+export const GENERAL_EMAIL = 'build@ax10.in'
 
 export const siteMeta = {
   title: 'AX10 | High-Performance Experience Engineering',

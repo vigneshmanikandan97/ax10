@@ -1,6 +1,6 @@
 import { forwardRef } from 'react'
 import { Link } from 'react-router-dom'
-import { CONTACT_EMAIL, footerLinks } from '../../data/content'
+import { GENERAL_EMAIL, footerLinks } from '../../data/content'
 
 export const Footer = forwardRef<HTMLAnchorElement>(function Footer(_props, emailRef) {
   return (
@@ -24,10 +24,10 @@ export const Footer = forwardRef<HTMLAnchorElement>(function Footer(_props, emai
             <a
               ref={emailRef}
               id="footer-contact-email"
-              href={`mailto:${CONTACT_EMAIL}`}
+              href={`mailto:${GENERAL_EMAIL}`}
               className="block font-label-mono text-xs text-primary hover:underline"
             >
-              {CONTACT_EMAIL}
+              {GENERAL_EMAIL}
             </a>
           </div>
           <div className="flex flex-wrap gap-x-8 gap-y-4 md:gap-x-10">

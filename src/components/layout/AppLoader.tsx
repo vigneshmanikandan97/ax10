@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from '../../lib/gsap'
 import { LanternField } from '../effects/LanternField'
 
-const MIN_LOADER_MS = 2200
+const MIN_LOADER_MS = 1200
 
 function waitForAssets() {
   return Promise.all([
