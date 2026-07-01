@@ -152,6 +152,32 @@
   }
 }
 
+/* Mobile perf: backdrop-filter blur is a heavy per-frame GPU repaint on touch
+   devices, worst on the sticky navbar and glass cards during scroll. Swap blur
+   for cheaper opaque fills on coarse-pointer devices. */
+@media (pointer: coarse) {
+  .liquid-glass,
+  .frosted-bar,
+  .frosted-panel {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .liquid-glass,
+  .frosted-bar {
+    background: rgba(18, 20, 21, 0.92);
+  }
+
+  .liquid-glass::before {
+    filter: none;
+  }
+
+  [class*='backdrop-blur'] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
