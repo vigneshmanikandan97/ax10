@@ -2,6 +2,16 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Repo map: `CODEMAP.md`
+
+`CODEMAP.md` at the repo root is a generated, file-by-file index of the whole codebase — roles, routes, load/render flow, design tokens, the canvas render pipeline, and where all marketing copy lives.
+
+**For AI agents / LLM tooling:** read `CODEMAP.md` first, before scanning `src/`. It answers "where does X live?" from one small file instead of opening dozens of components, so a lookup costs a few hundred tokens instead of a full-tree crawl. Grep it (e.g. `grep -i email CODEMAP.md`) to jump straight to the owning file and line, then open only that file.
+
+**For humans:** use it as a table of contents to orient before diving in.
+
+Keep it current: regenerate or hand-patch `CODEMAP.md` after structural changes (new sections, effects, routes, or moved files) so lookups stay accurate.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
