@@ -7,6 +7,7 @@ import { LazyMount } from '../components/layout/LazyMount'
 import { LandingAtmosphere } from '../components/effects/LandingAtmosphere'
 import { HeroSection } from '../components/sections/HeroSection'
 import { useAppReady } from '../context/AppReadyContext'
+import { useCoarsePointer } from '../hooks/useCoarsePointer'
 import { scrollToSection } from '../lib/scroll'
 
 const CustomCursor = lazy(() =>
@@ -38,6 +39,7 @@ const TestimonialsSection = lazy(() =>
 export function HomePage() {
   const location = useLocation()
   const appReady = useAppReady()
+  const coarse = useCoarsePointer()
   const pageRef = useRef<HTMLDivElement>(null)
   const globeRef = useRef<HTMLDivElement>(null)
   const footerEmailRef = useRef<HTMLAnchorElement>(null)
@@ -59,9 +61,11 @@ export function HomePage() {
       <LandingAtmosphere />
       <Navbar />
 
-      <Suspense fallback={null}>
-        <CustomCursor />
-      </Suspense>
+      {!coarse ? (
+        <Suspense fallback={null}>
+          <CustomCursor />
+        </Suspense>
+      ) : null}
 
       <div
         ref={globeRef}
@@ -69,7 +73,7 @@ export function HomePage() {
         className="pointer-events-none absolute z-[1] block overflow-visible right-[-22vw] top-[4vh] h-[min(68vh,440px)] w-[min(68vh,440px)] sm:right-[-18vw] sm:top-[5vh] sm:h-[min(78vh,560px)] sm:w-[min(78vh,560px)] md:right-[-14vw] md:h-[min(90vh,760px)] md:w-[min(90vh,760px)] lg:right-[-10vw] lg:top-[5vh] lg:h-[min(108vh,1020px)] lg:w-[min(108vh,1020px)]"
         aria-hidden="true"
       >
-        {appReady ? (
+        {appReady && !coarse ? (
           <Suspense fallback={null}>
             <HeroBlob />
           </Suspense>

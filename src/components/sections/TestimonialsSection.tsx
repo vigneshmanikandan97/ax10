@@ -3,9 +3,11 @@ import { testimonials, testimonialsHeading } from '../../data/content'
 import { gsap } from '../../lib/gsap'
 import { DotGridCanvas } from '../effects/DotGridCanvas'
 import { BrutalCard, SectionLabel } from '../ui/BrutalCard'
+import { useCoarsePointer } from '../../hooks/useCoarsePointer'
 
 export function TestimonialsSection() {
   const sectionRef = useRef<HTMLElement>(null)
+  const coarse = useCoarsePointer()
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -51,7 +53,7 @@ export function TestimonialsSection() {
         className="pointer-events-none absolute inset-0 z-[1] overflow-hidden"
         aria-hidden="true"
       >
-        <DotGridCanvas overlay />
+        {!coarse ? <DotGridCanvas overlay /> : null}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_38%,rgba(8,9,10,0.42)_100%)]" />
       </div>
 
