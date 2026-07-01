@@ -128,7 +128,7 @@ All lazy. Fallback: `components/ui/RouteFallback.tsx`.
 ### Content (single source of copy)
 `src/data/content.ts` — all marketing copy + nav:
 - `navLinks` (What We Do/Why Us/Stories → #anchors), `footerLinks` (Privacy/Terms/Contact)
-- `CONTACT_EMAIL=build@ax10.in`, `SUPPORT_EMAIL=enquiries@ax10.in`, `siteMeta`
+- `CONTACT_EMAIL=enquiries@ax10.in`, `SUPPORT_EMAIL=support@ax10.in`, `siteMeta`
 - `heroCopy`, `capabilitiesIntro`, `capabilities` (3), `capabilityPillars` (3)
 - `whyUsProcess` (headline+body+3 steps), `whyUsCards` (5 value props)
 - `testimonials` (3, PLACEHOLDER), `testimonialsHeading`
