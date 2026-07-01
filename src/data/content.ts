@@ -12,8 +12,8 @@ export const footerLinks = [
   { label: 'Contact', href: '/contact' },
 ] as const
 
-export const CONTACT_EMAIL = 'launch@ax10.in'
-export const SUPPORT_EMAIL = 'harish@ax10.in'
+export const CONTACT_EMAIL = 'build@ax10.in'
+export const SUPPORT_EMAIL = 'enquiries@ax10.in'
 
 export const siteMeta = {
   title: 'AX10 | High-Performance Experience Engineering',
