@@ -70,10 +70,10 @@ export function HomePage() {
       <div
         ref={globeRef}
         data-hero-globe
-        className="pointer-events-none absolute z-[1] block overflow-visible right-[-22vw] top-[4vh] h-[min(68vh,440px)] w-[min(68vh,440px)] sm:right-[-18vw] sm:top-[5vh] sm:h-[min(78vh,560px)] sm:w-[min(78vh,560px)] md:right-[-14vw] md:h-[min(90vh,760px)] md:w-[min(90vh,760px)] lg:right-[-10vw] lg:top-[5vh] lg:h-[min(108vh,1020px)] lg:w-[min(108vh,1020px)]"
+        className="pointer-events-none absolute z-[1] block overflow-visible right-[-48vw] top-[4vh] h-[min(86vh,660px)] w-[min(86vh,660px)] sm:right-[-34vw] sm:top-[4vh] sm:h-[min(90vh,760px)] sm:w-[min(90vh,760px)] md:right-[-24vw] md:h-[min(100vh,900px)] md:w-[min(100vh,900px)] lg:right-[-16vw] lg:top-[4vh] lg:h-[min(112vh,1120px)] lg:w-[min(112vh,1120px)]"
         aria-hidden="true"
       >
-        {appReady && !coarse ? (
+        {appReady ? (
           <Suspense fallback={null}>
             <HeroBlob />
           </Suspense>

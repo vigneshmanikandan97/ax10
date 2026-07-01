@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from '../../lib/gsap'
 import { LanternField } from '../effects/LanternField'
-import { useCoarsePointer } from '../../hooks/useCoarsePointer'
 
 const MIN_LOADER_MS = 1200
 
@@ -25,7 +24,6 @@ export function AppLoader({ onComplete }: { onComplete: () => void }) {
   const progressRef = useRef<HTMLSpanElement>(null)
   const [progress, setProgress] = useState(0)
   const [visible, setVisible] = useState(true)
-  const coarse = useCoarsePointer()
 
   useLayoutEffect(() => {
     const root = rootRef.current
@@ -108,7 +106,7 @@ export function AppLoader({ onComplete }: { onComplete: () => void }) {
       aria-busy={progress < 100}
       aria-label="Loading AX10"
     >
-      {!coarse ? <LanternField enabled={visible} /> : null}
+      <LanternField enabled={visible} />
 
       <div className="relative z-10 px-6 text-center">
         <div

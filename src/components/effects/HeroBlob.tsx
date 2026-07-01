@@ -2,8 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { drawDitheredGlobe } from '../../lib/ditheredGlobe'
 import { useCanvasSurface } from '../../hooks/useCanvasSurface'
 import { useAppReady } from '../../context/AppReadyContext'
+import { useCoarsePointer } from '../../hooks/useCoarsePointer'
 
 const GLOBE_FPS = 60
+// Touch devices run the globe at a smaller buffer + lower fps to cut the
+// per-pixel dither cost while keeping the visual.
+const COARSE_MAX_BUFFER_EDGE = 440
+const COARSE_FPS = 30
 
 const BASE_ROT_X = 6
 const BASE_ROT_Y = -14
@@ -12,7 +17,7 @@ const BASE_SKEW_Y = -5
 function getGlobeLayout(width: number) {
   if (width < 640) {
     return {
-      scale: 0.72,
+      scale: 0.82,
       translateX: '4%',
       drawScale: 0.38,
       centerX: 0.5,
@@ -61,18 +66,24 @@ function applyGlobeTransform(el: HTMLElement, width: number) {
 /** Auto-spinning dithered globe blob for the hero. */
 export function HeroBlob() {
   const appReady = useAppReady()
+  const coarse = useCoarsePointer()
   const wrapperRef = useRef<HTMLDivElement>(null)
   const canvasHostRef = useRef<HTMLDivElement>(null)
   const layoutRef = useRef(getGlobeLayout(window.innerWidth))
-  const [canvasOptions, setCanvasOptions] = useState(() => {
-    const layout = layoutRef.current
-    return {
-      maxBufferEdge: layout.maxBufferEdge,
-      maxFps: layout.maxFps,
+  const buildOptions = useCallback(
+    (layout: ReturnType<typeof getGlobeLayout>) => ({
+      maxBufferEdge: coarse
+        ? Math.min(layout.maxBufferEdge, COARSE_MAX_BUFFER_EDGE)
+        : layout.maxBufferEdge,
+      maxFps: coarse ? COARSE_FPS : layout.maxFps,
       pauseOnScroll: true,
       enabled: appReady,
-    }
-  })
+    }),
+    [appReady, coarse],
+  )
+  const [canvasOptions, setCanvasOptions] = useState(() =>
+    buildOptions(layoutRef.current),
+  )
 
   useEffect(() => {
     const wrapper = wrapperRef.current
@@ -81,12 +92,7 @@ export function HeroBlob() {
     const syncLayout = () => {
       const layout = getGlobeLayout(window.innerWidth)
       layoutRef.current = layout
-      setCanvasOptions({
-        maxBufferEdge: layout.maxBufferEdge,
-        maxFps: layout.maxFps,
-        pauseOnScroll: true,
-        enabled: appReady,
-      })
+      setCanvasOptions(buildOptions(layout))
       applyGlobeTransform(wrapper, window.innerWidth)
     }
 
@@ -94,7 +100,7 @@ export function HeroBlob() {
     window.addEventListener('resize', syncLayout, { passive: true })
 
     return () => window.removeEventListener('resize', syncLayout)
-  }, [appReady])
+  }, [buildOptions])
 
   const draw = useCallback(
     (
