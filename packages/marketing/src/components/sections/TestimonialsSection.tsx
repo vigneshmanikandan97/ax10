@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef } from 'react'
+import { Star } from 'lucide-react'
 import { testimonials, testimonialsHeading } from '../../data/content'
 import { gsap } from '../../lib/gsap'
 import { DotGridCanvas } from '../effects/DotGridCanvas'
@@ -79,13 +80,11 @@ export function TestimonialsSection() {
               <BrutalCard className="flex h-full flex-col">
                 <div className="mb-6 flex gap-1 opacity-50 md:mb-8">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <span
+                    <Star
                       key={i}
-                      className="material-symbols-outlined text-xs text-primary"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      star
-                    </span>
+                      className="h-3.5 w-3.5 fill-primary text-primary"
+                      aria-hidden="true"
+                    />
                   ))}
                 </div>
                 <p className="mb-8 flex-1 text-[16px] font-light italic leading-relaxed text-text-primary md:mb-12 md:text-[18px]">

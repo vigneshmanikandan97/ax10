@@ -1,9 +1,16 @@
 import { useLayoutEffect, useRef } from 'react'
+import { Building2, Cog, Sparkles, type LucideIcon } from 'lucide-react'
 import { capabilities, capabilitiesIntro } from '../../data/content'
 import { gsap } from '../../lib/gsap'
 import { BrutalCard, SectionLabel } from '../ui/BrutalCard'
 import { CapabilitiesAside } from './capabilities/CapabilitiesAside'
 import { LiquidGlassFilter } from '../effects/LiquidGlassFilter'
+
+const capabilityIcons = {
+  architecture: Building2,
+  dynamic_form: Sparkles,
+  precision_manufacturing: Cog,
+} satisfies Record<(typeof capabilities)[number]['icon'], LucideIcon>
 
 export function CapabilitiesSection() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -79,13 +86,14 @@ export function CapabilitiesSection() {
           </div>
 
           <div data-cap-cards className="grid gap-4 md:gap-6">
-            {capabilities.map((cap) => (
+            {capabilities.map((cap) => {
+              const Icon = capabilityIcons[cap.icon]
+
+              return (
               <div key={cap.title} data-cap-card>
                 <BrutalCard className="frosted-bar !border !border-white/[0.08] !bg-transparent !shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_12px_40px_rgba(0,0,0,0.42)] hover:!shadow-brutal-primary">
                   <div className="mb-4 flex items-start justify-between md:mb-6">
-                    <span className="material-symbols-outlined text-2xl text-primary md:text-3xl">
-                      {cap.icon}
-                    </span>
+                    <Icon className="h-7 w-7 text-primary md:h-8 md:w-8" aria-hidden="true" />
                     <span className="border border-white/[0.08] bg-white/[0.06] px-2 py-0.5 font-label-mono text-[9px] text-text-secondary">
                       {cap.tag}
                     </span>
@@ -98,7 +106,8 @@ export function CapabilitiesSection() {
                   </p>
                 </BrutalCard>
               </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef } from 'react'
+import { ArrowDown, ArrowUpRight } from 'lucide-react'
 import { gsap } from '../../lib/gsap'
 import { heroCopy } from '../../data/content'
 import { BrutalButton } from '../ui/BrutalButton'
@@ -62,7 +63,7 @@ export function HeroSection() {
           <div data-hero-item className="flex flex-col gap-3 sm:flex-row sm:gap-4">
             <BrutalButton variant="primary" to="/contact" className="w-full sm:w-auto">
               Let&apos;s Talk
-              <span className="material-symbols-outlined text-sm">north_east</span>
+              <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
             </BrutalButton>
             <BrutalButton
               variant="ghost"
@@ -70,16 +71,17 @@ export function HeroSection() {
               onClick={() => scrollToSection('#what-we-do')}
             >
               See What We Do
-              <span className="material-symbols-outlined text-sm transition-transform duration-200 group-hover:translate-y-0.5">
-                south
-              </span>
+              <ArrowDown
+                className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5"
+                aria-hidden="true"
+              />
             </BrutalButton>
           </div>
         </div>
       </div>
 
       <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 animate-bounce opacity-40">
-        <span className="material-symbols-outlined text-text-secondary">south</span>
+        <ArrowDown className="h-5 w-5 text-text-secondary" aria-hidden="true" />
       </div>
     </header>
   )

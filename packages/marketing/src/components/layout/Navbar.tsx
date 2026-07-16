@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Menu, X } from 'lucide-react'
 import { navLinks } from '../../data/content'
 import { scrollToSection } from '../../lib/scroll'
 import { BrutalButton } from '../ui/BrutalButton'
@@ -108,9 +109,11 @@ export function Navbar() {
                 aria-expanded={open}
                 onClick={() => setOpen((v) => !v)}
               >
-                <span className="material-symbols-outlined text-2xl">
-                  {open ? 'close' : 'menu'}
-                </span>
+                {open ? (
+                  <X className="h-6 w-6" aria-hidden="true" />
+                ) : (
+                  <Menu className="h-6 w-6" aria-hidden="true" />
+                )}
               </button>
             </div>
           </div>

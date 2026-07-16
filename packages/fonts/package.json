@@ -1,0 +1,14 @@
+{
+  "name": "@ax10/fonts",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./shared.css": "./shared.css"
+  },
+  "dependencies": {
+    "@fontsource/geist": "^5.2.9",
+    "@fontsource/geist-mono": "^5.2.8",
+    "@fontsource/instrument-serif": "^5.2.8"
+  }
+}

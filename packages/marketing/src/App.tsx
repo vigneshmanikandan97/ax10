@@ -1,5 +1,6 @@
 import { lazy, Suspense, useLayoutEffect, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import { AppLoader } from './components/layout/AppLoader'
 import { RouteFallback } from './components/ui/RouteFallback'
 import { ScrollThread } from './components/effects/ScrollThread'
@@ -67,6 +68,7 @@ function App() {
         </Routes>
       </Suspense>
       {isHome && appReady ? <ScrollThread key={location.key} /> : null}
+      <Analytics />
     </AppReadyContext.Provider>
   )
 }

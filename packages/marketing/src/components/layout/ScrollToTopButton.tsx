@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ArrowUp } from 'lucide-react'
 import { scrollToTop } from '../../lib/scroll'
 
 export function ScrollToTopButton() {
@@ -32,7 +33,7 @@ export function ScrollToTopButton() {
           : 'pointer-events-none translate-y-4 opacity-0'
       }`}
     >
-      <span className="material-symbols-outlined">arrow_upward</span>
+      <ArrowUp className="h-5 w-5" aria-hidden="true" />
     </button>
   )
 }
