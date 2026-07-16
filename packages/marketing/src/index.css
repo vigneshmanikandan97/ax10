@@ -28,6 +28,29 @@
   ::selection {
     @apply bg-primary text-surface-deep;
   }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(105, 201, 145, 0.5) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(105, 201, 145, 0.5);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(105, 201, 145, 0.8);
+  }
 }
 
 @layer components {
