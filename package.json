@@ -1,5 +1,5 @@
 {
-  "name": "ax10",
+  "name": "ax10-monorepo",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,21 +10,14 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "gsap": "^3.15.0",
-    "lucide-react": "^1.17.0",
-    "motion": "^12.40.0",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "react-router-dom": "^7.17.0",
-    "tailwind-merge": "^3.6.0"
+    "dev:www": "pnpm --filter @ax10/marketing dev",
+    "dev:apps": "pnpm --filter @ax10/apps dev",
+    "build": "pnpm -r build",
+    "build:www": "pnpm --filter @ax10/marketing build",
+    "build:apps": "pnpm --filter @ax10/apps build",
+    "preview:www": "pnpm --filter @ax10/marketing preview",
+    "preview:apps": "pnpm --filter @ax10/apps preview",
+    "lint": "pnpm -r lint"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
