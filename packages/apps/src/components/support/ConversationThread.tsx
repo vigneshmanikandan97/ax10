@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Sparkles, Send, Mail, MessageSquare, StickyNote } from 'lucide-react'
-import type { Channel, ThreadMessage } from '../../data/tickets'
-import { ticket } from '../../data/tickets'
+import type { Channel, ThreadMessage, TicketRecord } from '../../data/tickets'
 
 const channelOptions: Array<{ value: Channel; label: string; icon: typeof Mail }> = [
   { value: 'email', label: 'Email', icon: Mail },
@@ -16,11 +15,13 @@ const channelBadge: Record<Channel, string> = {
 }
 
 export function ConversationThread({
+  ticket,
   messages,
   onSend,
   themisOpen,
   onToggleThemis,
 }: {
+  ticket: TicketRecord
   messages: ThreadMessage[]
   onSend: (text: string, channel: Channel) => void
   themisOpen: boolean
@@ -44,7 +45,7 @@ export function ConversationThread({
           </h1>
           <span className="h-4 w-px bg-[#3e4941]" />
           <span className="font-label-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#becabf]">
-            {ticket.code}
+            {ticket.systemCode}
           </span>
         </div>
         <button

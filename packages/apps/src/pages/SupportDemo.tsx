@@ -6,40 +6,69 @@ import { TicketQueuePanel } from '../components/support/TicketQueuePanel'
 import { ConversationThread } from '../components/support/ConversationThread'
 import { ThemisIntelPanel } from '../components/support/ThemisIntelPanel'
 import { NewTicketModal, type NewTicketInput } from '../components/support/NewTicketModal'
-import { ticket, type Channel, type QueueTicket, type ThreadMessage } from '../data/tickets'
+import { tickets as initialTickets, type Channel, type TicketRecord } from '../data/tickets'
 
 export function SupportDemo() {
   const [themisOpen, setThemisOpen] = useState(true)
   const [newTicketOpen, setNewTicketOpen] = useState(false)
-  const [messages, setMessages] = useState<ThreadMessage[]>(ticket.messages)
-  const [queue, setQueue] = useState<QueueTicket[]>(ticket.queue)
+  const [tickets, setTickets] = useState<TicketRecord[]>(initialTickets)
+  const [activeId, setActiveId] = useState(initialTickets[0].id)
+
+  const activeTicket = tickets.find((t) => t.id === activeId) ?? tickets[0]
 
   function handleSend(text: string, channel: Channel) {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `m${prev.length + 1}`,
-        from: 'agent',
-        name: 'You',
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        channel,
-        parts: [{ text }],
-      },
-    ])
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id !== activeId
+          ? t
+          : {
+              ...t,
+              messages: [
+                ...t.messages,
+                {
+                  id: `m${t.messages.length + 1}`,
+                  from: 'agent',
+                  name: 'You',
+                  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  channel,
+                  parts: [{ text }],
+                },
+              ],
+            },
+      ),
+    )
   }
 
   function handleCreateTicket(input: NewTicketInput) {
     const id = `${Math.floor(10000 + Math.random() * 9000)}`
-    setQueue((prev) => [
-      {
-        id,
-        code: `Ticket ${id}`,
-        title: input.title,
-        priority: input.priority,
-        meta: `OPENED BY ${input.customer.toUpperCase()} • JUST NOW`,
+    const newTicket: TicketRecord = {
+      id,
+      systemCode: input.title.toUpperCase().replace(/[^A-Z0-9]+/g, '_').slice(0, 40),
+      title: input.title,
+      priority: input.priority,
+      meta: `Opened by ${input.customer} • just now`,
+      messages: input.description
+        ? [{ id: 'm1', from: 'customer', name: input.customer, time: 'Just now', channel: 'email', parts: [{ text: input.description }] }]
+        : [],
+      aiSuggestion: {
+        badge: 'AI Suggestion',
+        body: 'New ticket — Themis has not analyzed this conversation yet.',
+        actions: [
+          { label: 'Apply Reply', tone: 'default' },
+          { label: 'Refine', tone: 'default' },
+        ],
       },
-      ...prev,
-    ])
+      ai: {
+        confidence: 0,
+        sentiment: 'PENDING',
+        sentimentNote: 'Awaiting first analysis pass',
+        summaryParts: [{ text: 'No summary available yet for this ticket.' }],
+        actions: [{ label: 'Run Themis Analysis', tone: 'default' }],
+        telemetry: Array.from({ length: 7 }, () => ({ height: 6, tone: 'ok' as const })),
+      },
+    }
+    setTickets((prev) => [newTicket, ...prev])
+    setActiveId(id)
     setNewTicketOpen(false)
   }
 
@@ -52,15 +81,16 @@ export function SupportDemo() {
         }`}
       >
         <QueueSidebar onNewTicket={() => setNewTicketOpen(true)} />
-        <TicketQueuePanel queue={queue} />
+        <TicketQueuePanel tickets={tickets} activeId={activeTicket.id} onSelect={setActiveId} />
         <ConversationThread
-          messages={messages}
+          ticket={activeTicket}
+          messages={activeTicket.messages}
           onSend={handleSend}
           themisOpen={themisOpen}
           onToggleThemis={() => setThemisOpen((v) => !v)}
         />
         {themisOpen ? (
-          <ThemisIntelPanel onClose={() => setThemisOpen(false)} />
+          <ThemisIntelPanel key={activeTicket.id} ticket={activeTicket} onClose={() => setThemisOpen(false)} />
         ) : (
           <button
             type="button"

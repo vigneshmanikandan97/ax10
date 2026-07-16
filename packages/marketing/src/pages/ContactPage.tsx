@@ -26,7 +26,7 @@ export function ContactPage() {
       {sent ? (
         <div className="mb-8 rounded-xl border-2 border-primary bg-primary/10 p-6 shadow-brutal-primary-sm">
           <p className="font-label-mono text-label-mono text-primary">
-            Message sent successfully. We&apos;ll be in touch soon.
+            Message received. We&apos;ll respond at the earliest with a proposal and a brief discovery call.
           </p>
         </div>
       ) : null}

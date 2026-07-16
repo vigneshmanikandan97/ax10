@@ -155,14 +155,17 @@ Demo showcase for apps.ax10.in. Same design tokens as marketing (own `tailwind.c
 ### Support demo (`/support`)
 Source: Figma "AX10 Support" (fileKey `tfaGsKnwEINRLjF36qX0g4`, node `1:2`), pulled via Figma MCP `get_design_context`. Terminal/brutalist palette distinct from marketing tokens — literal Figma hexes used via Tailwind arbitrary values (`#0f1511`/`#181d19`/`#1c211d` surfaces, `#3e4941` borders, `#85e5ab`/`#69c991` mint accent, `#ffb4ab` danger, `#dfe4dd`/`#becabf` text). Static mock data only, no backend.
 
+Data model: single `TicketRecord[]` array (`data/tickets.ts`) — every ticket carries both queue-row fields (id/title/priority/meta) and full detail (messages/aiSuggestion/ai block). `SupportDemo.tsx` owns `tickets` state + `activeId`, derives `activeTicket`, passes it down to thread + intel panel. Clicking any row in `TicketQueuePanel` swaps `activeId` → thread/intel repaint for that ticket. 4 seeded tickets deliberately varied: `12845` urgent/FRUSTRATED (DB outage, danger rollback action), `12842` medium/NEUTRAL (iOS login flicker, multi-turn), `12839` low/POSITIVE (docs typo, note channel), `12835` resolved/SATISFIED (Stripe webhook fix, danger reopen action). New tickets created via modal get a placeholder `PENDING` AI block and auto-select.
+
 | File | Role |
 |------|------|
-| `data/tickets.ts` | mock `ticket` (active ticket + thread + AI panel data) + `queue` (4 tickets) + `queueNav` (sidebar filters) |
+| `data/tickets.ts` | `TicketRecord[]` (`tickets`) — id/systemCode/title/priority/meta/messages/aiSuggestion/ai(confidence/sentiment/summaryParts/actions/telemetry); `queueNav` (sidebar filters) |
 | `components/support/AppTopNav.tsx` | AX10 logo + Dashboard/Triage/Analytics/Team tabs (Triage active) + bell/settings/avatar |
 | `components/support/QueueSidebar.tsx` | queue filters (All/My Queue/Urgent/Bugs/Feature Requests), NEW TICKET button, Help/Docs footer |
-| `components/support/TicketQueuePanel.tsx` | LIVE_QUEUE list, priority badges (urgent/medium/low/resolved), active-ticket left-accent row |
-| `components/support/ConversationThread.tsx` | ticket header (THEMIS_INTEL toggle), customer/agent message bubbles w/ inline code+danger token styling, dashed AI-suggestion card (APPLY_REPLY/REFINE), disabled command input footer |
-| `components/support/ThemisIntelPanel.tsx` | AI aside: confidence bar, sentiment badge, automated summary (highlighted spans), recommended actions (danger-styled rollback), telemetry bar chart |
+| `components/support/TicketQueuePanel.tsx` | `{tickets, activeId, onSelect}` — clickable rows (`<button>`), priority badges, active-row left-accent driven by `activeId` |
+| `components/support/ConversationThread.tsx` | `{ticket, messages, onSend, themisOpen, onToggleThemis}` — header shows `ticket.systemCode`, message bubbles w/ inline code+danger token styling, dashed AI-suggestion card, reply footer (channel picker: email/chat/note) |
+| `components/support/ThemisIntelPanel.tsx` | `{ticket, onClose}` — confidence ring, sentiment badge, automated summary (highlighted/danger/underline spans), recommended actions (danger tone e.g. rollback/reopen), telemetry bar chart |
+| `components/support/NewTicketModal.tsx` | `NewTicketInput` (title/description/priority/customer) → `SupportDemo.handleCreateTicket` builds full `TicketRecord`, prepends + auto-selects |
 
 ### Hub (`/`)
 `pages/Hub.tsx` — card grid over `demos[]` (name/description/href/icon/live). Live demos wrapped in `<Link>`; pending ones plain `<div>` at 50% opacity with "Soon" tag.

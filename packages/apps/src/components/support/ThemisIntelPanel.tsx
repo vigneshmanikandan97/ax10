@@ -1,7 +1,7 @@
 import { BarChart3, X, ArrowRight, RotateCcw } from 'lucide-react'
-import { ticket } from '../../data/tickets'
+import type { TicketRecord } from '../../data/tickets'
 
-export function ThemisIntelPanel({ onClose }: { onClose: () => void }) {
+export function ThemisIntelPanel({ ticket, onClose }: { ticket: TicketRecord; onClose: () => void }) {
   const { ai } = ticket
 
   return (

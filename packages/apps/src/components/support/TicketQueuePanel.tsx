@@ -1,5 +1,4 @@
-import type { Priority, QueueTicket } from '../../data/tickets'
-import { ticket } from '../../data/tickets'
+import type { Priority, TicketRecord } from '../../data/tickets'
 
 const priorityStyles: Record<Priority, string> = {
   urgent: 'border-[rgba(255,180,171,0.2)] bg-[rgba(255,180,171,0.1)] text-[#ffb4ab]',
@@ -8,18 +7,18 @@ const priorityStyles: Record<Priority, string> = {
   resolved: 'border-[rgba(124,218,143,0.2)] bg-[rgba(124,218,143,0.1)] text-[#7cda8f]',
 }
 
-function QueueRow({ item }: { item: QueueTicket }) {
+function QueueRow({ item, active, onClick }: { item: TicketRecord; active: boolean; onClick: () => void }) {
   return (
-    <div
-      className={`flex w-full flex-col gap-1 border-t border-[#3e4941] px-5 py-5 first:border-t-0 ${
-        item.active ? 'border-l-4 border-t-0 border-l-[#85e5ab] bg-[#181d19] pl-[16px]' : ''
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full flex-col gap-1 border-t border-[#3e4941] px-5 py-5 text-left first:border-t-0 hover:bg-[#181d19] ${
+        active ? 'border-l-4 border-t-0 border-l-[#85e5ab] bg-[#181d19] pl-[16px]' : ''
       } ${item.priority === 'resolved' ? 'opacity-60' : ''}`}
     >
       <div className="flex items-start justify-between">
-        <span
-          className={`font-label-mono text-[13px] ${item.active ? 'text-[#85e5ab]' : 'text-[#becabf]'}`}
-        >
-          {item.code}
+        <span className={`font-label-mono text-[13px] ${active ? 'text-[#85e5ab]' : 'text-[#becabf]'}`}>
+          Ticket {item.id}
         </span>
         <span
           className={`border px-2.5 py-0.5 font-label-mono text-[10px] uppercase ${priorityStyles[item.priority]}`}
@@ -29,7 +28,7 @@ function QueueRow({ item }: { item: QueueTicket }) {
       </div>
       <h3
         className={`pt-1 text-[16px] leading-[24px] ${
-          item.active ? 'font-semibold text-[#dfe4dd]' : 'text-[#becabf]'
+          active ? 'font-semibold text-[#dfe4dd]' : 'text-[#becabf]'
         }`}
       >
         {item.title}
@@ -37,11 +36,20 @@ function QueueRow({ item }: { item: QueueTicket }) {
       <p className="pt-1 font-label-mono text-[10px] uppercase text-[rgba(190,202,191,0.6)]">
         {item.meta}
       </p>
-    </div>
+    </button>
   )
 }
 
-export function TicketQueuePanel({ queue = ticket.queue }: { queue?: QueueTicket[] }) {
+export function TicketQueuePanel({
+  tickets,
+  activeId,
+  onSelect,
+}: {
+  tickets: TicketRecord[]
+  activeId: string
+  onSelect: (id: string) => void
+}) {
+  const activeCount = tickets.filter((t) => t.priority !== 'resolved').length
   return (
     <div className="flex h-full min-h-0 flex-col border-r border-[#3e4941] bg-[#0f1511]">
       <div className="flex h-16 items-center justify-between border-b border-[#3e4941] px-4">
@@ -49,12 +57,12 @@ export function TicketQueuePanel({ queue = ticket.queue }: { queue?: QueueTicket
           Live Queue
         </h2>
         <span className="bg-[rgba(133,229,171,0.2)] px-2 py-0.5 font-label-mono text-[10px] text-[#85e5ab]">
-          {ticket.activeCount} ACTIVE
+          {activeCount} Active
         </span>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {queue.map((item) => (
-          <QueueRow key={item.id} item={item} />
+        {tickets.map((item) => (
+          <QueueRow key={item.id} item={item} active={item.id === activeId} onClick={() => onSelect(item.id)} />
         ))}
       </div>
     </div>
