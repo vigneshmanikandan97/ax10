@@ -30,6 +30,11 @@ const WhyUsSection = lazy(() =>
     default: module.WhyUsSection,
   })),
 )
+const PlaygroundSection = lazy(() =>
+  import('../components/sections/PlaygroundSection').then((module) => ({
+    default: module.PlaygroundSection,
+  })),
+)
 const TestimonialsSection = lazy(() =>
   import('../components/sections/TestimonialsSection').then((module) => ({
     default: module.TestimonialsSection,
@@ -90,6 +95,11 @@ export function HomePage() {
         <LazyMount minHeight="min-h-screen">
           <Suspense fallback={<div className="min-h-screen" aria-hidden="true" />}>
             <WhyUsSection />
+          </Suspense>
+        </LazyMount>
+        <LazyMount minHeight="min-h-screen">
+          <Suspense fallback={<div className="min-h-screen" aria-hidden="true" />}>
+            <PlaygroundSection />
           </Suspense>
         </LazyMount>
         <LazyMount minHeight="min-h-screen">

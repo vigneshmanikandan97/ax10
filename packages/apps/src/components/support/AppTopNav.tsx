@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Bell, Settings } from 'lucide-react'
+import { Bell, Settings, ArrowLeft } from 'lucide-react'
 
 const links = [
   { label: 'Dashboard', to: '/support/dashboard' },
@@ -37,6 +37,14 @@ export function AppTopNav() {
         </nav>
       </div>
       <div className="flex items-center gap-4">
+        <a
+          href="https://ax10.in"
+          className="flex items-center gap-1.5 text-[13px] font-medium text-[#becabf] hover:text-[#dfe4dd]"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.75} />
+          ax10.in
+        </a>
+        <span className="h-4 w-px bg-[#3e4941]" />
         <Bell className="h-4 w-4 text-[#becabf]" strokeWidth={1.75} />
         <Settings className="h-5 w-5 text-[#becabf]" strokeWidth={1.75} />
         <span className="flex h-8 w-8 items-center justify-center border border-[#3e4941] bg-[#1c211d] font-label-mono text-[10px] text-[#becabf]">

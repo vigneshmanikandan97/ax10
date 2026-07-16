@@ -3,8 +3,11 @@
 export const navLinks = [
   { label: 'What We Do', href: '#what-we-do' },
   { label: 'Why Us', href: '#why-us' },
+  { label: 'Playground', href: '#playground' },
   { label: 'Stories', href: '#stories' },
 ] as const
+
+export const APPS_URL = 'https://apps.ax10.in'
 
 export const footerLinks = [
   { label: 'Privacy', href: '/privacy' },
@@ -137,6 +140,29 @@ export const whyUsCards = [
     body:
       'Every feature starts with a real person and a real problem. We design for the humans using the software, not the architecture diagram. Technology should shorten someone’s day, not add to it.',
     accent: '#69C991',
+  },
+] as const
+
+export const playgroundIntro = {
+  title: 'Play with what we build',
+  body: 'Process talk is cheap. Every capability above ships as working software first. Poke around live, static-data demos of the interfaces we build for clients — no signup, no sales call.',
+} as const
+
+export const playgroundDemos = [
+  {
+    name: 'AI Support Triage',
+    description: 'Ticket queue with AI-suggested replies, sentiment detection, and confidence scoring.',
+    live: true,
+  },
+  {
+    name: 'Commerce & Checkout',
+    description: 'Storefront, cart, and checkout flow.',
+    live: false,
+  },
+  {
+    name: 'Analytics Dashboard',
+    description: 'KPI tiles, charts, and filters over live data.',
+    live: false,
   },
 ] as const
 

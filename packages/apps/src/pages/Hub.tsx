@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowUpRight, LifeBuoy, ShoppingCart, BarChart3, Calendar, Package } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, LifeBuoy, ShoppingCart, BarChart3, Calendar, Package } from 'lucide-react'
 
 type Demo = {
   name: string
@@ -50,6 +50,13 @@ const demos: Demo[] = [
 export function Hub() {
   return (
     <main className="mx-auto flex min-h-screen max-w-container-max flex-col px-margin-mobile py-16 md:px-margin-desktop">
+      <a
+        href="https://ax10.in"
+        className="mb-8 inline-flex items-center gap-1.5 self-start text-sm text-text-secondary hover:text-primary"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.75} />
+        Back to ax10.in
+      </a>
       <p className="mb-4 font-label-caps text-label-caps uppercase text-primary">AX10 Apps</p>
       <h1 className="type-display max-w-2xl text-4xl font-display leading-none md:text-6xl">
         Sample applications, built the AX10 way
