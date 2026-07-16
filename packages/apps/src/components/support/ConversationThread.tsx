@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Sparkles, Send, Mail, MessageSquare, StickyNote } from 'lucide-react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Sparkles, Send, Mail, MessageSquare, StickyNote, X } from 'lucide-react'
 import type { Channel, ThreadMessage, TicketRecord } from '../../data/tickets'
 
 const channelOptions: Array<{ value: Channel; label: string; icon: typeof Mail }> = [
@@ -14,21 +14,53 @@ const channelBadge: Record<Channel, string> = {
   note: 'NOTE',
 }
 
+function renderParts(parts: ThreadMessage['parts']) {
+  return parts.map((part, i) =>
+    part.code ? (
+      <span key={i} className="bg-[#1c211d] font-label-mono text-[#69c991]">
+        {part.text}
+      </span>
+    ) : part.danger ? (
+      <span key={i} className="font-label-mono text-[#ffb4ab]">
+        {part.text}
+      </span>
+    ) : (
+      <span key={i}>{part.text}</span>
+    ),
+  )
+}
+
 export function ConversationThread({
   ticket,
   messages,
   onSend,
-  themisOpen,
-  onToggleThemis,
 }: {
   ticket: TicketRecord
   messages: ThreadMessage[]
   onSend: (text: string, channel: Channel) => void
-  themisOpen: boolean
-  onToggleThemis: () => void
 }) {
   const [draft, setDraft] = useState('')
   const [channel, setChannel] = useState<Channel>('email')
+  const [focused, setFocused] = useState(false)
+  const [suggestionDismissed, setSuggestionDismissed] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    setSuggestionDismissed(false)
+  }, [ticket.id])
+
+  const DEFAULT_TEXTAREA_HEIGHT = 64
+  const FOCUSED_MIN_HEIGHT = 320
+  const MAX_TEXTAREA_HEIGHT = 420
+
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+    textarea.style.height = 'auto'
+    const floor = focused ? FOCUSED_MIN_HEIGHT : DEFAULT_TEXTAREA_HEIGHT
+    const nextHeight = Math.min(Math.max(textarea.scrollHeight, floor), MAX_TEXTAREA_HEIGHT)
+    textarea.style.height = `${nextHeight}px`
+  }, [draft, focused])
 
   function handleSend() {
     if (!draft.trim()) return
@@ -38,31 +70,81 @@ export function ConversationThread({
 
   return (
     <div className="relative flex h-full min-h-0 flex-col bg-[#0d1210]">
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-[#3e4941] bg-[#0f1511] px-6">
-        <div className="flex items-center gap-4">
-          <h1 className="type-display font-display text-[24px] leading-[32px] text-[#dfe4dd]">
-            #{ticket.id}
-          </h1>
-          <span className="h-4 w-px bg-[#3e4941]" />
-          <span className="font-label-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#becabf]">
-            {ticket.systemCode}
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={onToggleThemis}
-          className={`flex items-center gap-2 font-label-mono text-[12px] font-medium uppercase tracking-[0.08em] ${
-            themisOpen ? 'text-[#85e5ab]' : 'text-[#becabf]'
-          }`}
-        >
-          <Sparkles className="h-3.5 w-3.5" strokeWidth={2} />
-          Themis Intel
-        </button>
+      <header className="flex h-16 shrink-0 items-center gap-4 border-b border-[#3e4941] bg-[#0f1511] px-6">
+        <h1 className="type-display font-display text-[24px] leading-[32px] text-[#dfe4dd]">
+          #{ticket.id}
+        </h1>
+        <span className="h-4 w-px bg-[#3e4941]" />
+        <span className="font-label-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#becabf]">
+          {ticket.systemCode}
+        </span>
       </header>
 
       <div className="min-h-0 flex-1 space-y-8 overflow-y-auto px-6 py-6 pb-40">
         {messages.map((message) => {
           const isCustomer = message.from === 'customer'
+
+          if (message.channel === 'email') {
+            return (
+              <div key={message.id} className="w-full max-w-[48rem] border border-[#3e4941] bg-[#12171a]">
+                <div
+                  className={`flex items-center justify-between border-b border-[#3e4941] px-5 py-2.5 ${
+                    isCustomer ? '' : 'bg-[rgba(133,229,171,0.06)]'
+                  }`}
+                >
+                  <span
+                    className={`font-label-mono text-[11px] font-bold uppercase tracking-[0.06em] ${
+                      isCustomer ? 'text-[#dfe4dd]' : 'text-[#85e5ab]'
+                    }`}
+                  >
+                    {message.name}
+                  </span>
+                  <span className="font-label-mono text-[11px] text-[#becabf]">{message.time}</span>
+                </div>
+                {message.email && (
+                  <div className="space-y-1 border-b border-[#3e4941] px-5 py-3 font-label-mono text-[11px] text-[#becabf]">
+                    <div>
+                      <span className="text-[#6b7280]">From:</span> {message.email.from}
+                    </div>
+                    <div>
+                      <span className="text-[#6b7280]">To:</span> {message.email.to}
+                    </div>
+                    {message.email.cc && (
+                      <div>
+                        <span className="text-[#6b7280]">Cc:</span> {message.email.cc}
+                      </div>
+                    )}
+                    {message.email.bcc && (
+                      <div>
+                        <span className="text-[#6b7280]">Bcc:</span> {message.email.bcc}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div className="px-5 py-4 text-[16px] leading-[26px] text-[#dfe4dd]">
+                  {renderParts(message.parts)}
+                </div>
+              </div>
+            )
+          }
+
+          if (message.channel === 'note') {
+            return (
+              <div
+                key={message.id}
+                className="w-full max-w-[48rem] border border-dashed border-[#5c6b60] bg-[rgba(133,229,171,0.03)] px-5 py-4"
+              >
+                <div className="mb-2 flex items-center gap-2 font-label-mono text-[10px] uppercase tracking-[0.08em] text-[#8a9990]">
+                  <StickyNote className="h-3 w-3" strokeWidth={2} />
+                  Internal Note — {message.name} · {message.time}
+                </div>
+                <div className="text-[15px] leading-[24px] text-[#c7d1cb]">
+                  {renderParts(message.parts)}
+                </div>
+              </div>
+            )
+          }
+
           return (
             <div
               key={message.id}
@@ -98,29 +180,26 @@ export function ConversationThread({
                     : 'border-[#85e5ab] bg-[rgba(133,229,171,0.05)] shadow-[4px_4px_0_0_#69c991]'
                 }`}
               >
-                {message.parts.map((part, i) =>
-                  part.code ? (
-                    <span key={i} className="bg-[#1c211d] font-label-mono text-[#69c991]">
-                      {part.text}
-                    </span>
-                  ) : part.danger ? (
-                    <span key={i} className="font-label-mono text-[#ffb4ab]">
-                      {part.text}
-                    </span>
-                  ) : (
-                    <span key={i}>{part.text}</span>
-                  ),
-                )}
+                {renderParts(message.parts)}
               </div>
             </div>
           )
         })}
 
+        {!suggestionDismissed && (
         <div className="relative max-w-[48rem] border border-dashed border-[#85e5ab] bg-[rgba(15,21,17,0.8)] p-[25px]">
           <span className="absolute left-6 top-[-12px] border border-[#85e5ab] bg-[#0f1511] px-2 py-px font-label-mono text-[10px] uppercase tracking-[0.06em] text-[#85e5ab]">
             {ticket.aiSuggestion.badge}
           </span>
-          <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={() => setSuggestionDismissed(true)}
+            aria-label="Dismiss AI suggestion"
+            className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center text-[#becabf] hover:text-[#dfe4dd]"
+          >
+            <X className="h-4 w-4" strokeWidth={2} />
+          </button>
+          <div className="flex gap-4 pr-6">
             <Sparkles className="mt-1 h-6 w-6 shrink-0 text-[#85e5ab]" strokeWidth={1.5} />
             <div className="flex flex-col gap-4">
               <p className="text-[16px] leading-[24px] text-[#dfe4dd] opacity-90">
@@ -144,6 +223,7 @@ export function ConversationThread({
             </div>
           </div>
         </div>
+        )}
       </div>
 
       <footer className="absolute inset-x-0 bottom-0 border-t border-[#3e4941] bg-[#0f1511] px-6 py-5">
@@ -170,20 +250,28 @@ export function ConversationThread({
         </div>
         <div className="relative border border-[#3e4941] bg-[#181d19]">
           <textarea
+            ref={textareaRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             onKeyDown={(e) => {
               if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                 e.preventDefault()
                 handleSend()
               }
+              if (e.key === 'Escape') {
+                setDraft('')
+                textareaRef.current?.blur()
+              }
             }}
             placeholder={`Reply via ${channelOptions.find((o) => o.value === channel)?.label}...`}
-            rows={2}
-            className="w-full resize-none bg-transparent p-[17px] pb-[24px] font-label-mono text-[16px] text-[#dfe4dd] placeholder:text-[#6b7280] focus:outline-none"
+            className="w-full resize-none overflow-y-auto bg-transparent p-[17px] pb-[24px] font-label-mono text-[16px] text-[#dfe4dd] placeholder:text-[#6b7280] transition-[height] duration-150 ease-out focus:outline-none"
           />
           <div className="absolute bottom-2 right-2 flex items-center gap-4">
-            <span className="font-label-mono text-[10px] text-[#becabf]">CMD + ENTER TO SEND</span>
+            <span className="flex items-center gap-1 font-label-mono text-[10px] text-[#becabf]">
+              <span className="text-[15px]">⌘⏎</span> TO SEND
+            </span>
             <button
               type="button"
               onClick={handleSend}

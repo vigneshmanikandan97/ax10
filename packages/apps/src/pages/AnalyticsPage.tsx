@@ -1,4 +1,5 @@
 import { Timer, ShieldCheck, CheckCircle2, BarChart3 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { AppTopNav } from '../components/support/AppTopNav'
 import { QueueSidebar } from '../components/support/QueueSidebar'
 import {
@@ -12,6 +13,7 @@ import {
   clusterTags,
   clusterStatus,
 } from '../data/analytics'
+import { tickets, queueFilters, type QueueKey } from '../data/tickets'
 
 const kpiIcons = { down: Timer, up: ShieldCheck, flat: CheckCircle2 }
 
@@ -43,6 +45,14 @@ function toPoints(values: number[]) {
 }
 
 export function AnalyticsPage() {
+  const navigate = useNavigate()
+  const queueCounts: Record<QueueKey, number> = {
+    all: tickets.length,
+    mine: tickets.filter(queueFilters.mine).length,
+    urgent: tickets.filter(queueFilters.urgent).length,
+    bugs: tickets.filter(queueFilters.bugs).length,
+    features: tickets.filter(queueFilters.features).length,
+  }
   const incomingPoints = toPoints(resolutionTrend.map((p) => p.incoming))
   const resolvedPoints = toPoints(resolutionTrend.map((p) => p.resolved))
   const peakStep = chartWidth / (resolutionTrend.length - 1)
@@ -53,7 +63,11 @@ export function AnalyticsPage() {
     <main className="flex h-screen flex-col bg-[#0f1511] text-[#dfe4dd]">
       <AppTopNav />
       <div className="grid flex-1 grid-cols-[240px_1fr] overflow-hidden">
-        <QueueSidebar />
+        <QueueSidebar
+          activeQueue="all"
+          onSelectQueue={(key) => navigate('/support/triage', { state: { queue: key } })}
+          counts={queueCounts}
+        />
         <div className="overflow-y-auto p-8">
           <div className="grid grid-cols-3 gap-4">
             {analyticsKpis.map((kpi) => {

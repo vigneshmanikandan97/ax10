@@ -1,20 +1,47 @@
-import { useState } from 'react'
-import { PanelRightOpen } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { Sparkles } from 'lucide-react'
 import { AppTopNav } from '../components/support/AppTopNav'
 import { QueueSidebar } from '../components/support/QueueSidebar'
 import { TicketQueuePanel } from '../components/support/TicketQueuePanel'
 import { ConversationThread } from '../components/support/ConversationThread'
 import { ThemisIntelPanel } from '../components/support/ThemisIntelPanel'
 import { NewTicketModal, type NewTicketInput } from '../components/support/NewTicketModal'
-import { tickets as initialTickets, type Channel, type TicketRecord } from '../data/tickets'
+import {
+  tickets as initialTickets,
+  queueFilters,
+  CURRENT_AGENT,
+  type Channel,
+  type QueueKey,
+  type TicketRecord,
+} from '../data/tickets'
 
 export function SupportDemo() {
+  const location = useLocation()
   const [themisOpen, setThemisOpen] = useState(true)
   const [newTicketOpen, setNewTicketOpen] = useState(false)
   const [tickets, setTickets] = useState<TicketRecord[]>(initialTickets)
+  const [activeQueue, setActiveQueue] = useState<QueueKey>(
+    (location.state as { queue?: QueueKey } | null)?.queue ?? 'all',
+  )
   const [activeId, setActiveId] = useState(initialTickets[0].id)
 
-  const activeTicket = tickets.find((t) => t.id === activeId) ?? tickets[0]
+  const visibleTickets = tickets.filter(queueFilters[activeQueue])
+  const queueCounts = {
+    all: tickets.length,
+    mine: tickets.filter(queueFilters.mine).length,
+    urgent: tickets.filter(queueFilters.urgent).length,
+    bugs: tickets.filter(queueFilters.bugs).length,
+    features: tickets.filter(queueFilters.features).length,
+  }
+
+  useEffect(() => {
+    if (!visibleTickets.some((t) => t.id === activeId)) {
+      setActiveId(visibleTickets[0]?.id ?? '')
+    }
+  }, [activeQueue, visibleTickets, activeId])
+
+  const activeTicket = tickets.find((t) => t.id === activeId) ?? visibleTickets[0] ?? tickets[0]
 
   function handleSend(text: string, channel: Channel) {
     setTickets((prev) =>
@@ -46,6 +73,8 @@ export function SupportDemo() {
       systemCode: input.title.toUpperCase().replace(/[^A-Z0-9]+/g, '_').slice(0, 40),
       title: input.title,
       priority: input.priority,
+      category: 'bug',
+      assignee: CURRENT_AGENT,
       meta: `Opened by ${input.customer} • just now`,
       messages: input.description
         ? [{ id: 'm1', from: 'customer', name: input.customer, time: 'Just now', channel: 'email', parts: [{ text: input.description }] }]
@@ -80,25 +109,25 @@ export function SupportDemo() {
           themisOpen ? 'grid-cols-[240px_320px_1fr_360px]' : 'grid-cols-[240px_320px_1fr_44px]'
         }`}
       >
-        <QueueSidebar onNewTicket={() => setNewTicketOpen(true)} />
-        <TicketQueuePanel tickets={tickets} activeId={activeTicket.id} onSelect={setActiveId} />
-        <ConversationThread
-          ticket={activeTicket}
-          messages={activeTicket.messages}
-          onSend={handleSend}
-          themisOpen={themisOpen}
-          onToggleThemis={() => setThemisOpen((v) => !v)}
+        <QueueSidebar
+          activeQueue={activeQueue}
+          onSelectQueue={setActiveQueue}
+          counts={queueCounts}
+          onNewTicket={() => setNewTicketOpen(true)}
         />
+        <TicketQueuePanel tickets={visibleTickets} activeId={activeTicket?.id ?? ''} onSelect={setActiveId} />
+        <ConversationThread ticket={activeTicket} messages={activeTicket.messages} onSend={handleSend} />
         {themisOpen ? (
           <ThemisIntelPanel key={activeTicket.id} ticket={activeTicket} onClose={() => setThemisOpen(false)} />
         ) : (
           <button
             type="button"
             onClick={() => setThemisOpen(true)}
-            aria-label="Expand Themis Intel"
+            title="Expand Themis Intelligence"
+            aria-label="Expand Themis Intelligence"
             className="flex h-full flex-col items-center gap-3 border-l border-[#3e4941] bg-[#1c211d] pt-5 hover:bg-[#242a25]"
           >
-            <PanelRightOpen className="h-4 w-4 text-[#85e5ab]" strokeWidth={1.75} />
+            <Sparkles className="h-4 w-4 text-[#85e5ab]" strokeWidth={1.75} />
           </button>
         )}
       </div>

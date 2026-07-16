@@ -1,5 +1,5 @@
 import { Inbox, Users, AlertTriangle, Bug, CheckCircle2, HelpCircle, FileText } from 'lucide-react'
-import { queueNav } from '../../data/tickets'
+import { queueNav, type QueueKey } from '../../data/tickets'
 
 const iconMap = {
   inbox: Inbox,
@@ -9,7 +9,17 @@ const iconMap = {
   check: CheckCircle2,
 }
 
-export function QueueSidebar({ onNewTicket }: { onNewTicket?: () => void }) {
+export function QueueSidebar({
+  activeQueue,
+  onSelectQueue,
+  counts,
+  onNewTicket,
+}: {
+  activeQueue: QueueKey
+  onSelectQueue: (key: QueueKey) => void
+  counts: Record<QueueKey, number>
+  onNewTicket?: () => void
+}) {
   return (
     <div className="flex h-full min-h-0 flex-col border-r border-[#3e4941] bg-[#1c211d] py-6">
       <div className="px-4 pb-8">
@@ -20,18 +30,25 @@ export function QueueSidebar({ onNewTicket }: { onNewTicket?: () => void }) {
       </div>
 
       <nav className="flex flex-1 flex-col gap-1">
-        {queueNav.map((item, index) => {
+        {queueNav.map((item) => {
           const Icon = iconMap[item.icon]
+          const active = item.key === activeQueue
           return (
             <button
-              key={item.label}
+              key={item.key}
               type="button"
-              className={`flex items-center gap-3 px-4 py-3 font-label-mono text-[12px] font-medium uppercase tracking-[0.08em] transition-colors hover:bg-[#242a25] ${
-                index === 0 ? 'text-[#85e5ab]' : 'text-[#becabf]'
+              onClick={() => onSelectQueue(item.key)}
+              className={`flex items-center justify-between gap-3 px-4 py-3 font-label-mono text-[12px] font-medium uppercase tracking-[0.08em] transition-colors hover:bg-[#242a25] ${
+                active ? 'bg-[#242a25] text-[#85e5ab]' : 'text-[#becabf]'
               }`}
             >
-              <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
-              {item.label}
+              <span className="flex items-center gap-3">
+                <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                {item.label}
+              </span>
+              <span className={`text-[10px] ${active ? 'text-[#85e5ab]' : 'text-[#6b7280]'}`}>
+                {counts[item.key]}
+              </span>
             </button>
           )
         })}

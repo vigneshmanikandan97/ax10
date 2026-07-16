@@ -61,9 +61,15 @@ export function TicketQueuePanel({
         </span>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {tickets.map((item) => (
-          <QueueRow key={item.id} item={item} active={item.id === activeId} onClick={() => onSelect(item.id)} />
-        ))}
+        {tickets.length === 0 ? (
+          <p className="px-5 py-6 font-label-mono text-[12px] uppercase tracking-[0.06em] text-[#6b7280]">
+            No tickets in this queue.
+          </p>
+        ) : (
+          tickets.map((item) => (
+            <QueueRow key={item.id} item={item} active={item.id === activeId} onClick={() => onSelect(item.id)} />
+          ))
+        )}
       </div>
     </div>
   )

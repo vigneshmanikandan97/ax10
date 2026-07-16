@@ -1,8 +1,14 @@
 export type Priority = 'urgent' | 'medium' | 'low' | 'resolved'
 
+export type TicketCategory = 'bug' | 'feature-request'
+
+export const CURRENT_AGENT = 'Alex Morgan'
+
 export type MessagePart = { text: string; code?: boolean; danger?: boolean }
 
 export type Channel = 'email' | 'chat' | 'note'
+
+export type EmailHeaders = { from: string; to: string; cc?: string; bcc?: string }
 
 export type ThreadMessage = {
   id: string
@@ -10,6 +16,7 @@ export type ThreadMessage = {
   name: string
   time: string
   channel?: Channel
+  email?: EmailHeaders
   parts: MessagePart[]
 }
 
@@ -28,6 +35,8 @@ export type TicketRecord = {
   systemCode: string
   title: string
   priority: Priority
+  category: TicketCategory
+  assignee: string
   meta: string
   messages: ThreadMessage[]
   aiSuggestion: { badge: string; body: string; actions: [AiAction, AiAction] }
@@ -47,6 +56,8 @@ export const tickets: TicketRecord[] = [
     systemCode: 'DB_CONN_TIMEOUT_PROD',
     title: 'Database connection timeouts in Production',
     priority: 'urgent',
+    category: 'bug',
+    assignee: 'Marcus Vance',
     meta: 'SLA breached • 12m ago',
     messages: [
       {
@@ -55,6 +66,7 @@ export const tickets: TicketRecord[] = [
         name: 'Alex Thompson',
         time: '10:42 UTC',
         channel: 'email',
+        email: { from: 'alex.thompson@nimbuscloud.io', to: 'support@ax10.in' },
         parts: [
           { text: 'Our production cluster in ' },
           { text: 'us-west-2', code: true },
@@ -118,6 +130,8 @@ export const tickets: TicketRecord[] = [
     systemCode: 'MOBILE_LOGIN_FLICKER_IOS17',
     title: 'Mobile app login flickering on iOS 17',
     priority: 'medium',
+    category: 'bug',
+    assignee: 'Alex Morgan',
     meta: 'Resolution due • 2h',
     messages: [
       {
@@ -126,6 +140,7 @@ export const tickets: TicketRecord[] = [
         name: 'Priya Nair',
         time: '09:10 UTC',
         channel: 'email',
+        email: { from: 'priya.nair@clientco.io', to: 'support@ax10.in' },
         parts: [
           {
             text: "After updating to iOS 17, the login screen flickers between the splash view and the form for about a second before settling. Doesn't happen on iOS 16.",
@@ -138,6 +153,7 @@ export const tickets: TicketRecord[] = [
         name: 'Marcus Vance',
         time: '09:32 UTC',
         channel: 'email',
+        email: { from: 'marcus.vance@ax10.in', to: 'priya.nair@clientco.io' },
         parts: [
           {
             text: 'Thanks for the details, Priya. Can you confirm which device model you\'re on? We have a lead on an ' },
@@ -151,6 +167,7 @@ export const tickets: TicketRecord[] = [
         name: 'Priya Nair',
         time: '09:40 UTC',
         channel: 'email',
+        email: { from: 'priya.nair@clientco.io', to: 'support@ax10.in', cc: 'devteam@clientco.io' },
         parts: [{ text: 'iPhone 14 Pro, but a colleague saw it on an iPhone 12 too.' }],
       },
     ],
@@ -195,6 +212,8 @@ export const tickets: TicketRecord[] = [
     systemCode: 'API_DOCS_TYPO_AUTH',
     title: 'API documentation typo in Auth section',
     priority: 'low',
+    category: 'bug',
+    assignee: 'Alex Morgan',
     meta: 'Resolution due • 5h',
     messages: [
       {
@@ -254,6 +273,8 @@ export const tickets: TicketRecord[] = [
     systemCode: 'STRIPE_WEBHOOK_VERIFY_FAIL',
     title: 'Stripe webhook verification failure',
     priority: 'resolved',
+    category: 'bug',
+    assignee: 'Marcus Vance',
     meta: 'Closed • 1h ago',
     messages: [
       {
@@ -262,6 +283,7 @@ export const tickets: TicketRecord[] = [
         name: 'Jordan Blake',
         time: 'Yesterday, 16:20 UTC',
         channel: 'email',
+        email: { from: 'jordan.blake@paylytics.io', to: 'support@ax10.in' },
         parts: [
           { text: 'Getting ' },
           { text: 'signature verification failed', danger: true },
@@ -274,6 +296,12 @@ export const tickets: TicketRecord[] = [
         name: 'Marcus Vance',
         time: 'Yesterday, 17:05 UTC',
         channel: 'email',
+        email: {
+          from: 'marcus.vance@ax10.in',
+          to: 'jordan.blake@paylytics.io',
+          cc: 'billing-ops@ax10.in',
+          bcc: 'compliance@ax10.in',
+        },
         parts: [
           { text: 'Root cause was a stale ' },
           { text: 'STRIPE_WEBHOOK_SECRET', code: true },
@@ -286,6 +314,7 @@ export const tickets: TicketRecord[] = [
         name: 'Jordan Blake',
         time: 'Yesterday, 17:12 UTC',
         channel: 'email',
+        email: { from: 'jordan.blake@paylytics.io', to: 'support@ax10.in' },
         parts: [{ text: 'Confirmed working on our end too. Thanks for the quick turnaround.' }],
       },
     ],
@@ -320,12 +349,89 @@ export const tickets: TicketRecord[] = [
       ],
     },
   },
+  {
+    id: '12851',
+    systemCode: 'CSV_EXPORT_TICKET_QUEUE',
+    title: 'Add CSV export for the ticket queue',
+    priority: 'low',
+    category: 'feature-request',
+    assignee: 'Alex Morgan',
+    meta: 'Requested • 3d ago',
+    messages: [
+      {
+        id: 'm1',
+        from: 'customer',
+        name: 'Rina Kapoor',
+        time: 'Mon, 14:05 UTC',
+        channel: 'email',
+        email: { from: 'rina.kapoor@lattice-ops.com', to: 'support@ax10.in' },
+        parts: [
+          {
+            text: "We run weekly reporting off ticket volume and priority. Right now we're screenshotting the queue, which doesn't scale. Could you add a CSV export for the current view?",
+          },
+        ],
+      },
+      {
+        id: 'm2',
+        from: 'agent',
+        name: 'Alex Morgan',
+        time: 'Mon, 15:40 UTC',
+        channel: 'email',
+        email: { from: 'alex.morgan@ax10.in', to: 'rina.kapoor@lattice-ops.com' },
+        parts: [
+          {
+            text: 'Makes sense — logging this as a feature request. Filtered export (by queue and priority) is on our roadmap for next sprint.',
+          },
+        ],
+      },
+    ],
+    aiSuggestion: {
+      badge: 'AI Suggestion',
+      body: 'Recurring ask from three accounts this quarter. Suggest tagging as a roadmap item and giving the customer a target sprint instead of an open-ended timeline.',
+      actions: [
+        { label: 'Add to Roadmap', tone: 'default' },
+        { label: 'Refine', tone: 'default' },
+      ],
+    },
+    ai: {
+      confidence: 88.3,
+      sentiment: 'POSITIVE',
+      sentimentNote: 'Customer patient, no urgency signal',
+      summaryParts: [
+        { text: 'Feature request: ' },
+        { text: 'CSV export', highlight: true },
+        { text: ' for the ticket queue view, filtered by priority. Requested by 3 accounts this quarter. Resolution status: ' },
+        { text: 'ON ROADMAP', highlight: true },
+        { text: '.' },
+      ],
+      actions: [{ label: 'Link to Roadmap Ticket', tone: 'default' }],
+      telemetry: [
+        { height: 8, tone: 'ok' },
+        { height: 9, tone: 'ok' },
+        { height: 7, tone: 'ok' },
+        { height: 8, tone: 'ok' },
+        { height: 9, tone: 'ok' },
+        { height: 8, tone: 'ok' },
+        { height: 7, tone: 'ok' },
+      ],
+    },
+  },
 ]
 
+export type QueueKey = 'all' | 'mine' | 'urgent' | 'bugs' | 'features'
+
+export const queueFilters: Record<QueueKey, (t: TicketRecord) => boolean> = {
+  all: () => true,
+  mine: (t) => t.assignee === CURRENT_AGENT,
+  urgent: (t) => t.priority === 'urgent',
+  bugs: (t) => t.category === 'bug',
+  features: (t) => t.category === 'feature-request',
+}
+
 export const queueNav = [
-  { label: 'All Tickets', icon: 'inbox' as const },
-  { label: 'My Queue', icon: 'user' as const },
-  { label: 'Urgent', icon: 'alert' as const },
-  { label: 'Bugs', icon: 'bug' as const },
-  { label: 'Feature Requests', icon: 'check' as const },
+  { key: 'all' as const, label: 'All Tickets', icon: 'inbox' as const },
+  { key: 'mine' as const, label: 'My Queue', icon: 'user' as const },
+  { key: 'urgent' as const, label: 'Urgent', icon: 'alert' as const },
+  { key: 'bugs' as const, label: 'Bugs', icon: 'bug' as const },
+  { key: 'features' as const, label: 'Feature Requests', icon: 'check' as const },
 ]
