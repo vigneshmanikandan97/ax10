@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { Navbar } from '../components/layout/Navbar'
 import { Footer } from '../components/layout/Footer'
 import { ScrollToTopButton } from '../components/layout/ScrollToTopButton'
+import { FloatingDPDPCTA } from '../components/ui/FloatingDPDPCTA'
 import { LazyMount } from '../components/layout/LazyMount'
 import { LandingAtmosphere } from '../components/effects/LandingAtmosphere'
 import { HeroSection } from '../components/sections/HeroSection'
@@ -111,6 +112,7 @@ export function HomePage() {
 
       <Footer ref={footerEmailRef} />
       <ScrollToTopButton />
+      <FloatingDPDPCTA />
     </div>
   )
 }

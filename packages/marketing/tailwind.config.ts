@@ -97,6 +97,10 @@ export default {
           '33%': { transform: 'translate3d(3%, -2%, 0) scale(1.05)' },
           '66%': { transform: 'translate3d(-2%, 3%, 0) scale(1.03)' },
         },
+        'gradient-x': {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
       },
       animation: {
         'glow-drift': 'glow-drift 8s ease-in-out infinite',
@@ -104,6 +108,7 @@ export default {
         'mesh-b': 'mesh-b 18s ease-in-out infinite',
         'mesh-c': 'mesh-c 12s ease-in-out infinite',
         'mesh-drift': 'mesh-drift 28s ease-in-out infinite',
+        'gradient-x': 'gradient-x 4s ease infinite',
       },
     },
   },

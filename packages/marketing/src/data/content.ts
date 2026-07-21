@@ -143,6 +143,45 @@ export const whyUsCards = [
   },
 ] as const
 
+export const dpdpProcess = {
+  title: 'Our DPDP Compliance Audit Process',
+  subtitle: 'A 6-step framework to find and close gaps in how your systems handle personal data.',
+  intro:
+    'Under the Digital Personal Data Protection Act, 2023 (DPDP Act), organisations handling personal data of individuals in India must demonstrate lawful collection, purpose limitation, security safeguards, and clear grievance handling. We run a structured 6-step audit to identify where your current systems fall short and what it takes to close each gap.',
+  steps: [
+    {
+      title: 'Data Mapping & Discovery',
+      description:
+        'We inventory every system, database, and third-party integration that collects, stores, or processes personal data, including shadow IT and legacy pipelines that rarely make it into official documentation.',
+    },
+    {
+      title: 'Legal Basis & Consent Review',
+      description:
+        'We check whether each data flow has a valid lawful basis under the DPDP Act, and audit consent capture, language, and withdrawal mechanisms against the notice requirements the Act mandates.',
+    },
+    {
+      title: 'Purpose Limitation & Data Minimisation Check',
+      description:
+        'We compare what data is actually collected against what each system needs to function, flagging over-collection, indefinite retention, and use of data beyond the purpose it was originally gathered for.',
+    },
+    {
+      title: 'Security Safeguards Assessment',
+      description:
+        'We review encryption in transit and at rest, access controls, breach detection, and incident response readiness against the "reasonable security safeguards" standard the DPDP Act requires.',
+    },
+    {
+      title: 'Data Principal Rights Readiness',
+      description:
+        'We test whether your systems can actually fulfil access, correction, erasure, and grievance-redressal requests within the timelines the Act expects, not just whether a policy page claims they can.',
+    },
+    {
+      title: 'Gap Report & Remediation Roadmap',
+      description:
+        'We deliver a prioritised list of gaps with severity, business impact, and a concrete remediation plan, engineering fixes where needed rather than handing back a checklist you have to solve yourself.',
+    },
+  ],
+} as const
+
 export const playgroundIntro = {
   title: 'Play with what we build',
   body: 'Process talk is cheap. Every capability above ships as working software first. Poke around live, static-data demos of the interfaces we build for clients — no signup, no sales call.',

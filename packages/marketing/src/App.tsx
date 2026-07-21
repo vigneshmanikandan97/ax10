@@ -18,6 +18,9 @@ const TermsPage = lazy(() =>
 const ContactPage = lazy(() =>
   import('./pages/ContactPage').then((module) => ({ default: module.ContactPage })),
 )
+const DPDPPage = lazy(() =>
+  import('./pages/DPDPPage').then((module) => ({ default: module.DPDPPage })),
+)
 
 function App() {
   const location = useLocation()
@@ -65,6 +68,7 @@ function App() {
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/dpdp" element={<DPDPPage />} />
         </Routes>
       </Suspense>
       {isHome && appReady ? <ScrollThread key={location.key} /> : null}
